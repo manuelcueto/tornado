@@ -1,10 +1,14 @@
 package seminario.futbol.model;
 
+import static seminario.futbol.model.EstadoTorneo.NO_INICIADO;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class Torneo {
 
+    private static final int MAX_EQUIPOS = 10;
     private String nombre;
     private EstadoTorneo estado;
     private String descripcion;
@@ -21,11 +25,20 @@ public class Torneo {
 	this.inicio = fechaInicio;
 	this.descripcion = descripcion;
 	this.categoria = categoria;
-	this.estado = EstadoTorneo.NO_INICIADO;
+	this.estado = NO_INICIADO;
+	this.equipos = new ArrayList<Equipo>();
     }
 
     public String getNombre() {
 	return this.nombre;
+    }
+
+    public boolean equipoAgregable(Equipo equipo) {
+	return this.estado == NO_INICIADO && this.equipos.size() < MAX_EQUIPOS && !this.equipos.contains(equipo);
+    }
+
+    public void agregarEquipoATorneo(Equipo equipo) {
+	this.equipos.add(equipo);
     }
 
 }

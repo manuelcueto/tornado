@@ -1,18 +1,20 @@
 package seminario.futbol.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Equipo {
 
-    Jugador capitan;
-    Integer categoria;
-    String nombre;
-    List<Jugador> jugadores;
+    private Jugador capitan;
+    private Integer categoria;
+    private String nombre;
+    private List<Jugador> jugadores;
 
     public Equipo(Integer categoria, String nombre) {
 	super();
 	this.categoria = categoria;
 	this.nombre = nombre;
+	this.jugadores = new ArrayList<Jugador>();
     }
 
     public Jugador getCapitan() {
@@ -23,7 +25,6 @@ public class Equipo {
 	if (this.categoria.equals(jugador.getCategoria()) && jugadores.size() < 10) {
 	    jugadores.add(jugador);
 	}
-
     }
 
     public void desasociarJugadorDeEquipo(Jugador jugador) {
