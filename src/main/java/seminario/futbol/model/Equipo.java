@@ -3,6 +3,8 @@ package seminario.futbol.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.jpa.criteria.expression.function.AggregationFunction.COUNT;
+
 public class Equipo {
 
     private Jugador capitan;
@@ -49,4 +51,7 @@ public class Equipo {
 	return this.nombre == nombreEquipo;
     }
 
+	public boolean noEstaCompleto() {
+		return ( this.jugadores.size() < 10);
+	}
 }

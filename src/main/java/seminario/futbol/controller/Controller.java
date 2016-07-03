@@ -17,18 +17,6 @@ public class Controller {
     @Autowired
     private TornadoService tornadoService;
 
-    @RequestMapping("/hello")
-    public String hello(@RequestParam String name) {
-	return "hello " + name;
-    }
-
-    @RequestMapping("/jugador")
-    public Jugador getJugador(@RequestParam String nroDocumento) {
-	Jugador jugador = new Jugador(nroDocumento, 1990, "trogolo@enfermo.com", EstadoJugador.EXPULSADO, new Date(),
-		"luis trologo", "0303456");
-	return jugador;
-    }
-
     @RequestMapping("/crear-torneo")
     public void crearTorneo(@RequestParam String nombre, @RequestParam Date fechaInicio,
 	    @RequestParam String descripcion, @RequestParam Integer categoria) {

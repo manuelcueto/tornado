@@ -12,13 +12,12 @@ public class Jugador {
     private String nombre;
     private String telefono;
 
-    public Jugador(String nroDocumento, Integer categoria, String mail, EstadoJugador estado, Date fechaNacimiento,
-	    String nombre, String telefono) {
+    public Jugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre, String telefono) {
 	super();
 	this.nroDocumento = nroDocumento;
 	this.categoria = categoria;
 	this.mail = mail;
-	this.estado = estado;
+	this.estado = EstadoJugador.HABILITADO;
 	this.fechaNacimiento = fechaNacimiento;
 	this.nombre = nombre;
 	this.telefono = telefono;
@@ -55,5 +54,6 @@ public class Jugador {
     public boolean sosElJugador(String nroDocumento) {
 	return this.nroDocumento.equals(nroDocumento);
     }
+
 
 }
