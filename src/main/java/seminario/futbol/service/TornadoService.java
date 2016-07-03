@@ -64,6 +64,8 @@ public class TornadoService {
     		this.equipos.add(this.equipoRepo.save(equipo));
     	}
     }
+    
+    
     private boolean verificarDnijugador(String nroDocumento) {
     	boolean existe = false;
     	int i = 0;
@@ -89,20 +91,10 @@ public class TornadoService {
 	public void asignarJugadorAEquipo(String nombreEquipo, String nroDocumento) {
 		Jugador jugador= this.buscarJugador(nroDocumento);	
 		Equipo equipo = this.buscarEquipo(nombreEquipo);
-		if (jugador != null && equipo != null && equipo.noEstaCompleto()) {
-		    equipo.AgregarJugadorAEquipo(jugador);
+		if (jugador != null && equipo != null && equipo.noEstaCompleto() && this.equipoRepo.findByNroDocumento(nroDocumento)==0) {
+		    equipo.asignarJugadorAEquipo(jugador);
+		    this.equipoRepo.saveJugadorEquipo(jugador.getNroDocumento(), equipo.getIdEquipo());
 		}
-	}
-	
-	private boolean buscarJugador(String nroDocumento) {
-    	int i = 0;
-    	while (i < this.equipos.size()) {
-    	    if (this.equipos.get(i).tenesJugador(nroDocumento)) {
-    	    	return true;
-    	    }
-    	    i++;
-    	}
-    	return false;
 	}
 	
     private Jugador buscarJugador(String nroDocumento) {

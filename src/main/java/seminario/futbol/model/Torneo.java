@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Entity;
+
+@Entity
 public class Torneo {
 
     private static final int MAX_EQUIPOS = 10;

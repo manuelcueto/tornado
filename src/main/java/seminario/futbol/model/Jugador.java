@@ -2,6 +2,9 @@ package seminario.futbol.model;
 
 import java.util.Date;
 
+import javax.persistence.Entity;
+
+@Entity
 public class Jugador {
 
     private String nroDocumento;
