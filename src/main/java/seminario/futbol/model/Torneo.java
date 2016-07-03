@@ -44,4 +44,8 @@ public class Torneo {
 	this.equipos.add(equipo);
     }
 
+    public void agregarCanchaATorneo(Cancha cancha) {
+	this.canchas.add(cancha);
+    }
+
 }

@@ -11,4 +11,8 @@ public class Cancha {
 	this.nombre = nombre;
     }
 
+    public boolean sosLaCancha(String nombreCancha) {
+	return this.nombre.equals(nombreCancha);
+    }
+
 }
