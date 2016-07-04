@@ -9,14 +9,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.jpa.criteria.expression.function.AggregationFunction.COUNT;
-
-import seminario.futbol.repositories.EquipoRepository;
-
 @Entity
 @Table(name = "equipos")
 public class Equipo {
-	
 	@Id
 	private Integer idEquipo;
 	
@@ -26,7 +21,6 @@ public class Equipo {
     private String nombre;
     @Transient
     private List<Jugador> jugadores;
-    
 
     public Equipo(Integer categoria, String nombre) {
 	super();
@@ -36,10 +30,10 @@ public class Equipo {
     }
 
     public Integer getIdEquipo() {
-		return idEquipo;
-	}
+	return idEquipo;
+    }
 
-	public Jugador getCapitan() {
+    public Jugador getCapitan() {
 	return this.capitan;
     }
 
@@ -61,9 +55,12 @@ public class Equipo {
 	return this.nombre == nombreEquipo;
     }
 
-	public boolean noEstaCompleto() {
-		return ( this.jugadores.size() < 10);
-	}
+    public boolean noEstaCompleto() {
+	return (this.jugadores.size() < 10);
+    }
 
+    public boolean tenesJugador(Jugador jugador) {
+	return (this.jugadores.contains(jugador));
+    }
 
 }
