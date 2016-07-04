@@ -1,5 +1,6 @@
 package seminario.futbol.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,11 +17,9 @@ import seminario.futbol.repositories.TorneoRepository;
 
 @Service
 public class TornadoService {
-	@Autowired
+	
     private List<Torneo> torneos;
-	@Autowired
     private List<Equipo> equipos;
-	@Autowired
     private List<Jugador> jugadores;
 
     @Autowired
@@ -30,6 +29,11 @@ public class TornadoService {
     @Autowired
 	private JugadorRepository jugadorRepo;
 
+    public TornadoService() {
+    	this.torneos = new ArrayList<Torneo>();
+    	this.equipos = new ArrayList<Equipo>();
+    	this.jugadores = new ArrayList<Jugador>();
+    }
     public boolean verificarNombreTorneo(String nombreTorneo) {
 	boolean existe = false;
 	int i = 0;
