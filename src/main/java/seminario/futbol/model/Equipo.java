@@ -4,14 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
+@Table(name = "equipos")
 public class Equipo {
-
-    private Integer idEquipo;
+	@Id
+	private Integer idEquipo;
+	
+	@OneToOne
     private Jugador capitan;
     private Integer categoria;
     private String nombre;
+    @Transient
     private List<Jugador> jugadores;
 
     public Equipo(Integer categoria, String nombre) {

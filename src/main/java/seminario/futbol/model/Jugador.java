@@ -3,11 +3,16 @@ package seminario.futbol.model;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "jugadores")
 public class Jugador {
 
+	@Id
     private String nroDocumento;
+
     private Integer categoria;
     private String mail;
     private EstadoJugador estado;
