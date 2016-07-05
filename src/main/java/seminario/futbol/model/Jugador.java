@@ -14,8 +14,10 @@ public class Jugador {
     private Date fechaNacimiento;
     private String nombre;
     private String telefono;
+    private Integer idEquipo;
 
-    public Jugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre, String telefono) {
+    public Jugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre,
+	    String telefono) {
 	super();
 	this.nroDocumento = nroDocumento;
 	this.categoria = categoria;
@@ -57,6 +59,5 @@ public class Jugador {
     public boolean sosElJugador(String nroDocumento) {
 	return this.nroDocumento.equals(nroDocumento);
     }
-
 
 }
