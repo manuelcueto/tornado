@@ -18,8 +18,8 @@ import seminario.futbol.repositories.TorneoRepository;
 
 @Service
 public class TornadoService {
-    
-	private List<Torneo> torneos;
+
+    private List<Torneo> torneos;
     private List<Equipo> equipos;
     private List<Jugador> jugadores;
 
@@ -36,10 +36,11 @@ public class TornadoService {
     private CanchaRepository canchaRepo;
 
     public TornadoService() {
-    	this.torneos = new ArrayList<Torneo>();
-    	this.equipos = new ArrayList<Equipo>();
-    	this.jugadores = new ArrayList<Jugador>();
+	this.torneos = new ArrayList<Torneo>();
+	this.equipos = new ArrayList<Equipo>();
+	this.jugadores = new ArrayList<Jugador>();
     }
+
     public boolean verificarNombreTorneo(String nombreTorneo) {
 	boolean existe = false;
 	int i = 0;
@@ -120,10 +121,11 @@ public class TornadoService {
     public void asignarJugadorAEquipo(String nombreEquipo, String nroDocumento) {
 	Jugador jugador = this.buscarJugador(nroDocumento);
 	Equipo equipo = this.buscarEquipo(nombreEquipo);
-	if (jugador != null && equipo != null && equipo.noEstaCompleto()
-		&& this.equipoRepo.findByNroDocumento(nroDocumento) == 0) {
-	    equipo.asignarJugadorAEquipo(jugador);
-	    this.equipoRepo.saveJugadorEquipo(jugador.getNroDocumento(), equipo.getIdEquipo());
+	if (jugador != null && equipo != null && equipo.noEstaCompleto() && jugador.tieneEquipo()) {
+	    if (this.jugadorRepo.setEquipo(equipo.getIdEquipo(), jugador.getNroDocumento()) == 1) {
+		jugador.setEquipo(equipo);
+		equipo.asignarJugadorAEquipo(jugador);
+	    }
 	}
     }
 

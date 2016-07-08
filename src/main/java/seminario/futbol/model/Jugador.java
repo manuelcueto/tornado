@@ -4,13 +4,15 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "jugadores")
 public class Jugador {
 
-	@Id
+    @Id
     private String nroDocumento;
 
     private Integer categoria;
@@ -19,7 +21,10 @@ public class Jugador {
     private Date fechaNacimiento;
     private String nombre;
     private String telefono;
-    private Integer idEquipo;
+
+    @ManyToOne
+    @JoinColumn(name = "idEquipo")
+    private Equipo equipo;
 
     public Jugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre,
 	    String telefono) {
@@ -63,6 +68,14 @@ public class Jugador {
 
     public boolean sosElJugador(String nroDocumento) {
 	return this.nroDocumento.equals(nroDocumento);
+    }
+
+    public void setEquipo(Equipo equipo) {
+	this.equipo = equipo;
+    }
+
+    public boolean tieneEquipo() {
+	return this.equipo != null;
     }
 
 }

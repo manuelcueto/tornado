@@ -12,10 +12,10 @@ import javax.persistence.Transient;
 @Entity
 @Table(name = "equipos")
 public class Equipo {
-	@Id
-	private Integer idEquipo;
-	
-	@OneToOne
+    @Id
+    private Integer idEquipo;
+
+    @OneToOne
     private Jugador capitan;
     private Integer categoria;
     private String nombre;
@@ -38,7 +38,7 @@ public class Equipo {
     }
 
     public void asignarJugadorAEquipo(Jugador jugador) {
-	if (this.categoria.equals(jugador.getCategoria()) && jugadores.size() < 10) {
+	if (this.categoria.equals(jugador.getCategoria())) {
 	    jugadores.add(jugador);
 	}
     }
