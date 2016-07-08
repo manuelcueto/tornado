@@ -19,6 +19,7 @@ public class Jugador {
     private Date fechaNacimiento;
     private String nombre;
     private String telefono;
+    private Equipo equipo;
 
     public Jugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre, String telefono) {
 	super();
@@ -62,6 +63,15 @@ public class Jugador {
     public boolean sosElJugador(String nroDocumento) {
 	return this.nroDocumento.equals(nroDocumento);
     }
+
+	public void asignarEquipoAJugador(Equipo equipo) {
+		this.equipo=equipo;
+	}
+
+	public void desasociarEquipoDeJugador() {
+		this.equipo=null;
+		
+	}
 
 
 }

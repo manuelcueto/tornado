@@ -14,7 +14,7 @@ public interface EquipoRepository extends CrudRepository<Equipo, Integer> {
 	public int findByNroDocumento(String nroDocumento);
 
     @Modifying
-    @Query("insert into equipo_jugador values (?1, ?2) ")
-	public void saveJugadorEquipo(String nroDocumento, Integer idEquipo);
+	    @Query("update equipos set capitan=?1 where idEquipo=?2")
+		public void saveCapitanDeEquipo(String nroDocumento, Integer idEquipo);
     
 }
