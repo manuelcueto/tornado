@@ -21,7 +21,6 @@ public class Jugador {
     private Date fechaNacimiento;
     private String nombre;
     private String telefono;
-
     @ManyToOne
     @JoinColumn(name = "idEquipo")
     private Equipo equipo;
@@ -76,6 +75,11 @@ public class Jugador {
 
     public boolean tieneEquipo() {
 	return this.equipo != null;
+    }
+
+    public void desasociarEquipoDeJugador() {
+	this.equipo = null;
+
     }
 
 }

@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `basetornado` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `basetornado`;
 -- MySQL dump 10.13  Distrib 5.7.9, for Win64 (x86_64)
 --
 -- Host: localhost    Database: basetornado
@@ -132,12 +130,14 @@ CREATE TABLE `jugadores` (
   `nroDocumento` varchar(10) NOT NULL,
   `categoria` int(10) unsigned NOT NULL,
   `mail` varchar(45) NOT NULL,
-  `idEquipo` int(11) NOT NULL,
   `estado` varchar(10) NOT NULL,
   `fechaNacimiento` datetime NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `telefono` varchar(10) NOT NULL,
-  PRIMARY KEY (`nroDocumento`)
+  `equipo` int(11) DEFAULT NULL,
+  PRIMARY KEY (`nroDocumento`),
+  KEY `fk_equipojugador_idx` (`equipo`),
+  CONSTRAINT `fk_equipojugador` FOREIGN KEY (`equipo`) REFERENCES `equipos` (`idEquipo`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -314,4 +314,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-07-03 18:51:31
+-- Dump completed on 2016-07-07 20:14:08

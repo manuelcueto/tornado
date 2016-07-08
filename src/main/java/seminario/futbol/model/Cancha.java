@@ -1,7 +1,15 @@
 package seminario.futbol.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "canchas")
 public class Cancha {
 
+    @Id
+    private Integer idCancha;
     private String direccion;
     private String nombre;
 

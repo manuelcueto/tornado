@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
+import seminario.futbol.model.Gol;
 import seminario.futbol.model.Jugador;
+import seminario.futbol.model.Partido;
 import seminario.futbol.model.Torneo;
 import seminario.futbol.repositories.CanchaRepository;
 import seminario.futbol.repositories.EquipoRepository;
 import seminario.futbol.repositories.JugadorRepository;
+import seminario.futbol.repositories.PartidoRepository;
 import seminario.futbol.repositories.TorneoRepository;
 
 @Service
@@ -22,8 +25,8 @@ public class TornadoService {
     private List<Torneo> torneos;
     private List<Equipo> equipos;
     private List<Jugador> jugadores;
-
-    @Autowired
+    private List<Partido> partidos;
+    private List<Gol> goles;
     private List<Cancha> canchas;
 
     @Autowired
@@ -34,11 +37,16 @@ public class TornadoService {
     private JugadorRepository jugadorRepo;
     @Autowired
     private CanchaRepository canchaRepo;
+    @Autowired
+    private PartidoRepository partidoRepo;
 
     public TornadoService() {
 	this.torneos = new ArrayList<Torneo>();
 	this.equipos = new ArrayList<Equipo>();
 	this.jugadores = new ArrayList<Jugador>();
+	this.partidos = new ArrayList<Partido>();
+	this.goles = new ArrayList<Gol>();
+	this.canchas = new ArrayList<Cancha>();
     }
 
     public boolean verificarNombreTorneo(String nombreTorneo) {
@@ -122,12 +130,23 @@ public class TornadoService {
 	Jugador jugador = this.buscarJugador(nroDocumento);
 	Equipo equipo = this.buscarEquipo(nombreEquipo);
 	if (jugador != null && equipo != null && equipo.noEstaCompleto() && jugador.tieneEquipo()) {
-	    if (this.jugadorRepo.setEquipo(equipo.getIdEquipo(), jugador.getNroDocumento()) == 1) {
-		jugador.setEquipo(equipo);
-		equipo.asignarJugadorAEquipo(jugador);
-	    }
+	    // if (this.jugadorRepo.setEquipo(equipo.getIdEquipo(),
+	    // jugador.getNroDocumento()) == 1) {
+	    jugador.setEquipo(equipo);
+	    equipo.asignarJugadorAEquipo(jugador);
 	}
+	// this.jugadorRepo.saveEquipoJugador(equipo.getIdEquipo(),
+	// jugador.getNroDocumento()); /// HAY
+	/// QUE
+	/// VER
+	/// SI
+	/// ESTA
+	/// BIEN
+	/// ESTA
+	/// PERSISTENCIA
     }
+
+    // }
 
     private Jugador buscarJugador(String nroDocumento) {
 	int i = 0;
@@ -180,7 +199,15 @@ public class TornadoService {
 	Equipo equipo = this.buscarEquipo(nombreEquipo);
 	if (jugador != null && equipo != null && equipo.getCapitan() == null && equipo.tenesJugador(jugador)) {
 	    equipo.asignarCapitanDeEquipo(jugador);
-	    // falta persistir
+	    // this.equipoRepo.saveCapitanDeEquipo(jugador.getNroDocumento(),
+	    // equipo.getIdEquipo()); /// HAY
+	    /// QUE
+	    /// REVISAR
+	    /// SI
+	    /// ESTA
+	    /// PERSISTENCIA
+	    /// ESTA
+	    /// BIEN
 	}
     }
 
@@ -189,8 +216,39 @@ public class TornadoService {
 	Equipo equipo = this.buscarEquipo(nombreEquipo);
 	if (jugador != null && equipo != null && equipo.tenesJugador(jugador)) {
 	    equipo.desasociarJugadorDeEquipo(jugador);
-	    // falta persistir
+	    jugador.desasociarEquipoDeJugador();
+	    // this.jugadorRepo.removeEquipoJugador(jugador.getNroDocumento());
+	    // /// HAY
+	    /// QUE
+	    /// REVISAR
+	    /// SI
+	    /// ESTA
+	    /// PERSISTENCIA
+	    /// ESTA
+	    /// BIEN
 	}
+    }
+
+    public void crearGol(Integer cantidadGoles, Integer idPartido, String nroDocumento) {
+	Partido partido = this.buscarPartido(idPartido);
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	Gol gol = new Gol(cantidadGoles, partido, jugador);
+
+    }
+
+    private Partido buscarPartido(Integer idPartido) {
+	int i = 0;
+	while (i < this.partidos.size()) {
+	    if (this.partidos.get(i).sosElPartido(idPartido)) {
+		return this.partidos.get(i);
+	    }
+	    i++;
+	}
+	return this.partidoRepo.findOne(idPartido);
+    }
+
+    public void cargarResultados(String nombreTorneo, Integer nroFecha, String nombreEquipoA, String nombreEquipoB) {
+
     }
 
 }
