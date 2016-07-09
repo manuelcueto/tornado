@@ -5,12 +5,14 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import seminario.futbol.model.Cancha;
+import seminario.futbol.model.Equipo;
 import seminario.futbol.model.Jugador;
 import seminario.futbol.service.TornadoService;
 
@@ -73,13 +75,25 @@ public class Controller {
     }
 
     @RequestMapping(value = "/equipos/{idEquipo}/jugadores", method = RequestMethod.PUT)
-    public void asociarJugadorAEquipo(@PathVariable("idEquipo") Integer idEquipo,
-	    @RequestParam("nroDocumento") String nroDocumento) {
+    public void asociarJugadorAEquipo(@PathVariable("idEquipo") Integer idEquipo, @RequestBody Jugador jugador) {
 	try {
-	    this.tornadoService.asociarJugadorAEquipo(idEquipo, nroDocumento);
+	    this.tornadoService.asociarJugadorAEquipo(idEquipo, jugador.getNroDocumento());
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
+    }
+
+    @RequestMapping(value = "/equipos", method = RequestMethod.GET)
+    public Iterable<Equipo> listarEquipos() {
+	return this.tornadoService.listarEquipos();
+    }
+
+    @RequestMapping(value = "/jugadores", method = RequestMethod.PUT)
+    public void crearJugador(@RequestParam("nroDocumento") String nroDocumento,
+	    @RequestParam("categoria") Integer categoria, @RequestParam("mail") String mail,
+	    @RequestParam("nroDocumento") Date fechaNacimiento, @RequestParam("nombre") String nombre,
+	    @RequestParam("nroDocumento") String telefono) {
+
     }
 
     @RequestMapping("/crear-torneo")
