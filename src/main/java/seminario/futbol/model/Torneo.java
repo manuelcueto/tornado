@@ -96,4 +96,8 @@ public class Torneo {
     private void reordenar(int ronda) {
 	this.equipos.add(ronda + 1, this.equipos.get(this.equipos.size() - 1));
     }
+
+    public List<Equipo> getEquipos() {
+	return this.equipos;
+    }
 }

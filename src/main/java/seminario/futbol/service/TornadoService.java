@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import seminario.futbol.estadisticas.EstadisticaJugador;
 import seminario.futbol.estadisticas.EstadisticasEquipo;
+import seminario.futbol.estadisticas.EstadisticasJugador;
+import seminario.futbol.estadisticas.EstadisticasPartido;
+import seminario.futbol.estadisticas.TablaGeneral;
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
 import seminario.futbol.model.Jugador;
@@ -250,17 +252,22 @@ public class TornadoService {
     // estadisticas (goles jugador, tarjetas jugador, goles equipo, tarjetas
     // equipo
 
-    public EstadisticaJugador estadisticasJugador(String nroDocumento) {
+    public EstadisticasJugador estadisticasJugador(String nroDocumento) throws SQLException {
 	Map<String, Integer> tarjetas = this.tarjetasJugador(nroDocumento);
-	return new EstadisticaJugador(this.golesJugador(nroDocumento), tarjetas.get("Tarjetas Rojas"),
-		tarjetas.get("Tarjetas Amarillas"));
+	return new EstadisticasJugador(this.golesJugador(nroDocumento), tarjetas.get("Tarjetas Rojas"),
+		tarjetas.get("Tarjetas Amarillas"), this.jugadorRepo.findOne(nroDocumento).getNombre());
     }
 
     public EstadisticasEquipo estadisticasEquipo(Integer idEquipo) throws SQLException {
-	List<EstadisticaJugador> estadisticas = new ArrayList<EstadisticaJugador>();
+
+	List<EstadisticasJugador> estadisticas = new ArrayList<EstadisticasJugador>();
 	Equipo equipo = this.buscarEquipo(idEquipo);
 	equipo.getJugadores().forEach(jugador -> {
-	    estadisticas.add(this.estadisticasJugador(jugador.getNroDocumento()));
+	    try {
+		estadisticas.add(this.estadisticasJugador(jugador.getNroDocumento()));
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
 	});
 	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.GANA_A)
 		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.GANA_B);
@@ -271,15 +278,94 @@ public class TornadoService {
 	return new EstadisticasEquipo(estadisticas, partidosGanados, partidosEmpatados, partidosPerdidos);
     }
 
-    private Integer golesJugador(String nroDocumento) {
-	return this.golRepo.countByNroDocumento(nroDocumento);
+    public EstadisticasEquipo estadisticasEquipo(Integer idEquipo, Integer idTorneo) throws SQLException {
+
+	List<EstadisticasJugador> estadisticas = new ArrayList<EstadisticasJugador>();
+	Equipo equipo = this.buscarEquipo(idEquipo);
+	equipo.getJugadores().forEach(jugador -> {
+	    try {
+		estadisticas.add(this.estadisticasJugador(jugador.getNroDocumento()));
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
+	});
+	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo.getIdEquipo(),
+		Resultado.GANA_A, idTorneo)
+		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo.getIdEquipo(), Resultado.GANA_B,
+			idTorneo);
+	Integer partidosEmpatados = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo.getIdEquipo(),
+		Resultado.EMPATE, idTorneo)
+		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo.getIdEquipo(), Resultado.EMPATE,
+			idTorneo);
+	Integer partidosPerdidos = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo.getIdEquipo(),
+		Resultado.GANA_B, idTorneo)
+		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo.getIdEquipo(), Resultado.GANA_A,
+			idTorneo);
+	return new EstadisticasEquipo(estadisticas, partidosGanados, partidosEmpatados, partidosPerdidos);
     }
 
-    public Map<String, Integer> tarjetasJugador(String nroDocumento) {
+    public EstadisticasPartido estadisticasPartido(Integer idPartido) throws SQLException {
+	Partido partido = this.buscarPartido(idPartido);
+	Equipo equipoA = partido.getEquipoA();
+	Equipo equipoB = partido.getEquipoB();
+	List<EstadisticasJugador> estadisticasA = new ArrayList<>();
+	List<EstadisticasJugador> estadisticasB = new ArrayList<>();
+	equipoA.getJugadores().forEach(jugador -> {
+	    Map<String, Integer> tarjetas = new HashMap<>();
+	    try {
+		tarjetas = this.tarjetasJugador(jugador.getNroDocumento());
+	    } catch (Exception e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	    }
+	    try {
+		estadisticasA.add(new EstadisticasJugador(this.golesJugador(jugador.getNroDocumento()),
+			tarjetas.get("Tarjetas Rojas"), tarjetas.get("Tarjetas Amarillas"), jugador.getNombre()));
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
+	});
+	equipoB.getJugadores().forEach(jugador -> {
+	    Map<String, Integer> tarjetas = new HashMap<>();
+	    try {
+		tarjetas = this.tarjetasJugador(jugador.getNroDocumento());
+	    } catch (Exception e1) {
+		e1.printStackTrace();
+	    }
+	    try {
+		estadisticasB.add(new EstadisticasJugador(this.golesJugador(jugador.getNroDocumento()),
+			tarjetas.get("Tarjetas Rojas"), tarjetas.get("Tarjetas Amarillas"), jugador.getNombre()));
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
+	});
+	return new EstadisticasPartido(estadisticasA, estadisticasB, equipoA.getNombre(), equipoB.getNombre(),
+		partido.getResultado());
+    }
+
+    public TablaGeneral tablaGeneral(Integer idTorneo) throws SQLException {
+	Torneo torneo = this.buscarTorneo(idTorneo);
+	List<EstadisticasEquipo> metricasEquipos = new ArrayList<>();
+	torneo.getEquipos().forEach(equipo -> {
+	    try {
+		metricasEquipos.add(this.estadisticasEquipo(equipo.getIdEquipo(), idTorneo));
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
+	});
+	return new TablaGeneral(torneo.getNombre(), metricasEquipos);
+    }
+
+    private Integer golesJugador(String nroDocumento) throws SQLException {
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	return this.golRepo.countByJugador(jugador);
+    }
+
+    private Map<String, Integer> tarjetasJugador(String nroDocumento) throws SQLException {
+	Jugador jugador = this.buscarJugador(nroDocumento);
 	Map<String, Integer> tarjetas = new HashMap<String, Integer>();
-	tarjetas.put("Tarjetas Amarillas",
-		this.tarjetaRepo.countByNroDocumentoAndTipo(nroDocumento, TipoTarjeta.AMARILLA));
-	tarjetas.put("Tarjetas Rojas", this.tarjetaRepo.countByNroDocumentoAndTipo(nroDocumento, TipoTarjeta.ROJA));
+	tarjetas.put("Tarjetas Amarillas", this.tarjetaRepo.countByJugadorAndTipo(jugador, TipoTarjeta.AMARILLA));
+	tarjetas.put("Tarjetas Rojas", this.tarjetaRepo.countByJugadorAndTipo(jugador, TipoTarjeta.ROJA));
 	return tarjetas;
     }
 

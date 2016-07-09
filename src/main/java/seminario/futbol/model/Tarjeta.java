@@ -1,12 +1,22 @@
 package seminario.futbol.model;
 
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "tarjetas")
 public class Tarjeta {
 
+    @Id
+    private Integer idTarjeta;
+
+    @OneToOne
     private Jugador jugador;
     @ManyToOne
     @JoinColumn(name = "idPartido")

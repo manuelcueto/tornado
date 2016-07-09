@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -18,14 +19,19 @@ public class Partido {
     @Id
     private Integer idPartido;
 
+    @OneToOne
     private Equipo equipoA;
+    @OneToOne
     private Equipo equipoB;
+    @OneToOne
     private Arbitro arbitro;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "partido")
     private List<Gol> goles;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "partido")
     private List<Tarjeta> tarjetas;
+    @OneToOne
     private Torneo torneo;
+    @OneToOne
     private Cancha cancha;
     private Date fecha;
     private Integer nroFecha;

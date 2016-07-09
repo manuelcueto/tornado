@@ -4,7 +4,7 @@ import java.util.List;
 
 public class EstadisticasEquipo {
 
-    private List<EstadisticaJugador> estadisticasJugadores;
+    private List<EstadisticasJugador> estadisticasJugadores;
     private Integer partidosGanados;
     private Integer partidosEmpatados;
     private Integer partidosPerdidos;
@@ -12,7 +12,35 @@ public class EstadisticasEquipo {
     private Integer totalTarjetasRojas;
     private Integer totalTarjetasAmarillas;
 
-    public EstadisticasEquipo(List<EstadisticaJugador> estadisticasJugadores, Integer partidosGanados,
+    public List<EstadisticasJugador> getEstadisticasJugadores() {
+	return estadisticasJugadores;
+    }
+
+    public Integer getPartidosGanados() {
+	return partidosGanados;
+    }
+
+    public Integer getPartidosEmpatados() {
+	return partidosEmpatados;
+    }
+
+    public Integer getPartidosPerdidos() {
+	return partidosPerdidos;
+    }
+
+    public Integer getTotalGoles() {
+	return totalGoles;
+    }
+
+    public Integer getTotalTarjetasRojas() {
+	return totalTarjetasRojas;
+    }
+
+    public Integer getTotalTarjetasAmarillas() {
+	return totalTarjetasAmarillas;
+    }
+
+    public EstadisticasEquipo(List<EstadisticasJugador> estadisticasJugadores, Integer partidosGanados,
 	    Integer partidosEmpatados, Integer partidosPerdidos) {
 	super();
 	this.estadisticasJugadores = estadisticasJugadores;

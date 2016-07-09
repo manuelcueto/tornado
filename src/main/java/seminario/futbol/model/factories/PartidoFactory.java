@@ -6,6 +6,7 @@ import seminario.futbol.model.Arbitro;
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
 import seminario.futbol.model.Partido;
+import seminario.futbol.model.Resultado;
 import seminario.futbol.model.Torneo;
 
 public class PartidoFactory extends Partido {
@@ -46,6 +47,7 @@ public class PartidoFactory extends Partido {
     }
 
     public Partido build() {
+	this.setResultado(Resultado.NO_JUGADO);
 	return this;
     }
 }

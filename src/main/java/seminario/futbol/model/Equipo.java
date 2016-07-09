@@ -72,4 +72,8 @@ public class Equipo {
     public List<Jugador> getJugadores() {
 	return this.jugadores;
     }
+
+    public String getNombre() {
+	return this.nombre;
+    }
 }

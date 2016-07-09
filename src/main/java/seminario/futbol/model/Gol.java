@@ -1,13 +1,23 @@
 package seminario.futbol.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "goles")
 public class Gol {
+
+    @Id
+    private Integer idGol;
 
     @ManyToOne
     @JoinColumn(name = "idPartido")
     private Partido partido;
+    @OneToOne
     private Jugador jugador;
 
     public Partido getPartido() {
