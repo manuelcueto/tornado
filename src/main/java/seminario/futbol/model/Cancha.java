@@ -12,11 +12,23 @@ public class Cancha {
     private Integer idCancha;
     private String direccion;
     private String nombre;
+    private String telefono;
+    private String dueno;
 
-    public Cancha(String direccion, String nombre) {
-	super();
+    public void setDireccion(String direccion) {
 	this.direccion = direccion;
+    }
+
+    public void setNombre(String nombre) {
 	this.nombre = nombre;
+    }
+
+    public void setTelefono(String telefono) {
+	this.telefono = telefono;
+    }
+
+    public void setDueno(String dueno) {
+	this.dueno = dueno;
     }
 
     public boolean sosLaCancha(String nombreCancha) {

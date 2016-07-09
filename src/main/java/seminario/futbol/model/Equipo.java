@@ -1,13 +1,13 @@
 package seminario.futbol.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Entity
 @Table(name = "equipos")
@@ -19,15 +19,9 @@ public class Equipo {
     private Jugador capitan;
     private Integer categoria;
     private String nombre;
-    @Transient
-    private List<Jugador> jugadores;
 
-    public Equipo(Integer categoria, String nombre) {
-	super();
-	this.categoria = categoria;
-	this.nombre = nombre;
-	this.jugadores = new ArrayList<Jugador>();
-    }
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "equipo")
+    private List<Jugador> jugadores;
 
     public Integer getIdEquipo() {
 	return idEquipo;
@@ -37,18 +31,30 @@ public class Equipo {
 	return this.capitan;
     }
 
-    public void asignarJugadorAEquipo(Jugador jugador) {
+    public void setCapitan(Jugador capitan) {
+	this.capitan = capitan;
+    }
+
+    public void setCategoria(Integer categoria) {
+	this.categoria = categoria;
+    }
+
+    public void setNombre(String nombre) {
+	this.nombre = nombre;
+    }
+
+    public boolean hasCapitan() {
+	return this.capitan != null;
+    }
+
+    public void asignarJugador(Jugador jugador) {
 	if (this.categoria.equals(jugador.getCategoria())) {
 	    jugadores.add(jugador);
 	}
     }
 
-    public void desasociarJugadorDeEquipo(Jugador jugador) {
+    public void desasociarJugador(Jugador jugador) {
 	this.jugadores.remove(jugador);
-    }
-
-    public void asignarCapitanDeEquipo(Jugador capitan) {
-	this.capitan = capitan;
     }
 
     public boolean sosElEquipo(String nombreEquipo) {
@@ -59,8 +65,11 @@ public class Equipo {
 	return (this.jugadores.size() < 10);
     }
 
-    public boolean tenesJugador(Jugador jugador) {
-	return (this.jugadores.contains(jugador));
+    public boolean hasJugador(Jugador jugador) {
+	return this.jugadores.contains(jugador);
     }
 
+    public List<Jugador> getJugadores() {
+	return this.jugadores;
+    }
 }

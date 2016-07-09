@@ -1,33 +1,41 @@
 package seminario.futbol.service;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import seminario.futbol.estadisticas.EstadisticaJugador;
+import seminario.futbol.estadisticas.EstadisticasEquipo;
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
-import seminario.futbol.model.Gol;
 import seminario.futbol.model.Jugador;
 import seminario.futbol.model.Partido;
+import seminario.futbol.model.Resultado;
+import seminario.futbol.model.TipoTarjeta;
 import seminario.futbol.model.Torneo;
+import seminario.futbol.model.factories.CanchaFactory;
+import seminario.futbol.model.factories.EquipoFactory;
+import seminario.futbol.model.factories.GolFactory;
+import seminario.futbol.model.factories.JugadorFactory;
+import seminario.futbol.model.factories.TarjetaFactory;
 import seminario.futbol.repositories.CanchaRepository;
 import seminario.futbol.repositories.EquipoRepository;
+import seminario.futbol.repositories.GolRepository;
 import seminario.futbol.repositories.JugadorRepository;
 import seminario.futbol.repositories.PartidoRepository;
+import seminario.futbol.repositories.TarjetaRepository;
 import seminario.futbol.repositories.TorneoRepository;
 
 @Service
+@Transactional
 public class TornadoService {
-
-    private List<Torneo> torneos;
-    private List<Equipo> equipos;
-    private List<Jugador> jugadores;
-    private List<Partido> partidos;
-    private List<Gol> goles;
-    private List<Cancha> canchas;
 
     @Autowired
     private TorneoRepository torneoRepo;
@@ -39,216 +47,248 @@ public class TornadoService {
     private CanchaRepository canchaRepo;
     @Autowired
     private PartidoRepository partidoRepo;
+    @Autowired
+    private GolRepository golRepo;
+    @Autowired
+    private TarjetaRepository tarjetaRepo;
 
-    public TornadoService() {
-	this.torneos = new ArrayList<Torneo>();
-	this.equipos = new ArrayList<Equipo>();
-	this.jugadores = new ArrayList<Jugador>();
-	this.partidos = new ArrayList<Partido>();
-	this.goles = new ArrayList<Gol>();
-	this.canchas = new ArrayList<Cancha>();
+    // canchas: crear, modificar, borrar, listar
+
+    public void crearCancha(String nombre, String direccion, String dueno, String telefono) {
+	CanchaFactory fact = new CanchaFactory();
+	this.canchaRepo
+		.save(fact.withNombre(nombre).withDireccion(direccion).withDueno(dueno).withTelefono(telefono).build());
     }
 
-    public boolean verificarNombreTorneo(String nombreTorneo) {
-	boolean existe = false;
-	int i = 0;
-	while (i < this.torneos.size() && !existe) {
-	    existe = this.torneos.get(i).getNombre().equals(nombreTorneo);
-	    i++;
-	}
-	if (!existe) {
-	    existe = this.torneoRepo.findByNombre(nombreTorneo) != null;
-	}
-	return existe;
+    public void modificarCancha(Integer idCancha, String nombre, String direccion, String dueno, String telefono) {
+	this.canchaRepo.modificarCancha(dueno, telefono, nombre, direccion, idCancha);
     }
 
-    public void crearTorneo(String nombre, Date fechaInicio, String descripcion, Integer categoria) {
-	if (!this.verificarNombreTorneo(nombre)) {
-	    Torneo torneo = new Torneo(nombre, fechaInicio, descripcion, categoria);
-	    this.torneos.add(this.torneoRepo.save(torneo));
+    public void borrarCancha(Integer idCancha) {
+	this.canchaRepo.delete(idCancha);
+    }
+
+    public Iterable<Cancha> listarCanchas() {
+	return this.canchaRepo.findAll();
+    }
+
+    // Equipos: Crear, borrar, elegir capitan, asociar jugador, desasociar
+    // jugador, listar
+
+    public void crearEquipo(String nombre, Integer categoria) {
+	if (this.equipoRepo.findByNombre(nombre) == null) {
+	    Equipo equipo = new EquipoFactory().withNombre(nombre).withCategoria(categoria).build();
+	    this.equipoRepo.save(equipo);
 	}
     }
 
+    public void borrarEquipo(Integer idEquipo) {
+	this.equipoRepo.delete(idEquipo);
+    }
+
+    public void asignarCapitanAEquipo(String nombreEquipo, String nroDocumento) throws SQLException {
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	Equipo equipo = this.buscarEquipo(nombreEquipo);
+	if (!equipo.hasCapitan() && equipo.hasJugador(jugador)) {
+	    equipo.setCapitan(jugador);
+	    this.equipoRepo.update(jugador, equipo.getIdEquipo());
+	}
+    }
+
+    public void desasociarJugadorDeEquipo(Integer idEquipo, String nroDocumento) throws SQLException {
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	Equipo equipo = this.buscarEquipo(idEquipo);
+	if (equipo.hasJugador(jugador)) {
+	    equipo.desasociarJugador(jugador);
+	    jugador.desasociarEquipo();
+	    this.jugadorRepo.removeEquipoJugador(jugador.getNroDocumento());
+	}
+    }
+
+    public void asignarJugadorAEquipo(Integer idEquipo, String nroDocumento) throws SQLException {
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	Equipo equipo = this.buscarEquipo(idEquipo);
+	if (equipo.noEstaCompleto() && !jugador.tieneEquipo()) {
+	    jugador.setEquipo(equipo);
+	    equipo.asignarJugador(jugador);
+	    this.jugadorRepo.update(jugador.getNroDocumento(), equipo);
+	}
+    }
+
+    public Iterable<Equipo> listarEquipos() {
+	return this.equipoRepo.findAll();
+    }
+
+    // Jugador: Crear, Borrar, listar
     public void crearJugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre,
 	    String telefono) {
-	if (!this.verificarDnijugador(nroDocumento)) {
-	    Jugador jug = new Jugador(nroDocumento, categoria, mail, fechaNacimiento, nombre, telefono);
-	    this.jugadores.add(this.jugadorRepo.save(jug));
+	if (!this.existeJugador(nroDocumento)) {
+	    Jugador jugador = new JugadorFactory().withNroDocumento(nroDocumento).withCategoria(categoria)
+		    .withMail(mail).withFechaNacimiento(fechaNacimiento).withNombre(nombre).withTelefono(telefono)
+		    .build();
+	    this.jugadorRepo.save(jugador);
 	}
     }
 
-    public void crearEquipo(Integer categoria, String nombre) {
-	if (!this.verificarNombreEquipo(nombre)) {
-	    Equipo equipo = new Equipo(categoria, nombre);
-	    this.equipos.add(this.equipoRepo.save(equipo));
+    public void borrarJugador(String nroDocumento) {
+	this.jugadorRepo.delete(nroDocumento);
+    }
+
+    public Iterable<Jugador> listarJugadores() {
+	return this.jugadorRepo.findAll();
+    }
+
+    // Torneo: crear, existeTorneo, agregar equipo, agregar canchas, agregar
+    // arbitros, listarTorneos
+
+    public void crearTorneo(String nombre, Date fechaInicio, String descripcion, Integer categoria) {
+	if (!this.existeTorneo(nombre)) {
+	    Torneo torneo = new Torneo(nombre, fechaInicio, descripcion, categoria);
+	    this.torneoRepo.save(torneo);
 	}
     }
 
-    private boolean verificarDnijugador(String nroDocumento) {
-	boolean existe = false;
-	int i = 0;
-	while (i < this.jugadores.size() && !existe) {
-	    existe = this.jugadores.get(i).sosElJugador(nroDocumento);
-	    i++;
-	}
-	if (!existe) {
-	    existe = this.jugadorRepo.findOne(nroDocumento) != null;
-	}
-	return existe;
+    public boolean existeTorneo(String nombreTorneo) {
+	return this.torneoRepo.findByNombre(nombreTorneo) != null;
     }
 
-    public void asignarEquipoATorneo(String nombreEquipo, String nombreTorneo) {
-	Torneo torneo = this.buscarTorneo(nombreTorneo);
-	Equipo equipo = this.buscarEquipo(nombreEquipo);
+    public void asignarEquipoATorneo(Integer idEquipo, Integer idTorneo) throws SQLException {
+	Torneo torneo = this.buscarTorneo(idTorneo);
+	Equipo equipo = this.buscarEquipo(idEquipo);
 
-	if (equipo != null && torneo != null && torneo.equipoAgregable(equipo)) {
+	if (torneo.equipoAgregable(equipo)) {
 	    torneo.agregarEquipoATorneo(equipo);
-	}
+	} // TODO: update equipo?
     }
 
-    public void asignarCanchaATorneo(String nombreCancha, String nombreTorneo) {
-	Torneo torneo = this.buscarTorneo(nombreTorneo);
+    public void asignarCanchaATorneo(String nombreCancha, Integer idTorneo) throws SQLException {
+	Torneo torneo = this.buscarTorneo(idTorneo);
 	Cancha cancha = this.buscarCancha(nombreCancha);
+	torneo.agregarCanchaATorneo(cancha);
+	// TODO: ManyToMany??
+    }
 
-	if (cancha != null && torneo != null) {
-	    torneo.agregarCanchaATorneo(cancha);
+    public Iterable<Torneo> listarTorneos() {
+	return this.torneoRepo.findAll();
+    }
+
+    public void publicarTorneo(Integer idTorneo) throws SQLException {
+	Torneo torneo = this.buscarTorneo(idTorneo);
+	if (torneo.publicable()) {
+	    List<Partido> partidos = torneo.publicar();
+	    this.partidoRepo.save(partidos);
+	    torneo.iniciarTorneo();
 	}
     }
 
-    private Cancha buscarCancha(String nombreCancha) {
-	int i = 0;
-	while (i < this.canchas.size()) {
-	    if (this.canchas.get(i).sosLaCancha(nombreCancha)) {
-		return this.canchas.get(i);
-	    }
-	    i++;
-	}
-	return this.canchaRepo.findOne(nombreCancha);
+    public Iterable<Partido> listarPartidos(Integer idTorneo) {
+	return this.partidoRepo.findByTorneo(idTorneo);
     }
 
-    public void asignarJugadorAEquipo(String nombreEquipo, String nroDocumento) {
-	Jugador jugador = this.buscarJugador(nroDocumento);
-	Equipo equipo = this.buscarEquipo(nombreEquipo);
-	if (jugador != null && equipo != null && equipo.noEstaCompleto() && jugador.tieneEquipo()) {
-	    // if (this.jugadorRepo.setEquipo(equipo.getIdEquipo(),
-	    // jugador.getNroDocumento()) == 1) {
-	    jugador.setEquipo(equipo);
-	    equipo.asignarJugadorAEquipo(jugador);
-	}
-	// this.jugadorRepo.saveEquipoJugador(equipo.getIdEquipo(),
-	// jugador.getNroDocumento()); /// HAY
-	/// QUE
-	/// VER
-	/// SI
-	/// ESTA
-	/// BIEN
-	/// ESTA
-	/// PERSISTENCIA
+    private boolean existeJugador(String nroDocumento) {
+	return this.jugadorRepo.findOne(nroDocumento) != null;
     }
 
-    // }
-
-    private Jugador buscarJugador(String nroDocumento) {
-	int i = 0;
-	while (i < this.jugadores.size()) {
-	    if (this.jugadores.get(i).sosElJugador(nroDocumento)) {
-		return this.jugadores.get(i);
-	    }
-	    i++;
-	}
-	return this.jugadorRepo.findOne(nroDocumento);
+    private Cancha buscarCancha(String nombre) {
+	return this.canchaRepo.findByNombre(nombre);
     }
 
-    public boolean verificarNombreEquipo(String nombreEquipo) {
-	boolean existe = false;
-	int i = 0;
-	while (i < this.equipos.size() && !existe) {
-	    existe = this.equipos.get(i).sosElEquipo(nombreEquipo);
-	    i++;
+    private Jugador buscarJugador(String nroDocumento) throws SQLException {
+	Jugador jugador = this.jugadorRepo.findOne(nroDocumento);
+	if (jugador != null) {
+	    return jugador;
 	}
-	if (!existe) {
-	    existe = this.equipoRepo.findByNombre(nombreEquipo) != null;
-	}
-	return existe;
+	throw new SQLException("El Jugador no existe");
     }
 
-    private Equipo buscarEquipo(String nombreEquipo) {
-	int i = 0;
-	while (i < this.equipos.size()) {
-	    if (this.equipos.get(i).sosElEquipo(nombreEquipo)) {
-		return this.equipos.get(i);
-	    }
-	    i++;
+    private Equipo buscarEquipo(Integer idEquipo) throws SQLException {
+	Equipo equipo = this.equipoRepo.findOne(idEquipo);
+	if (equipo != null) {
+	    return equipo;
 	}
-	return this.equipoRepo.findByNombre(nombreEquipo);
+	throw new SQLException("El Equipo no existe");
     }
 
-    private Torneo buscarTorneo(String nombreTorneo) {
-	int i = 0;
-	while (i < this.torneos.size()) {
-	    if (this.torneos.get(i).getNombre().equals(nombreTorneo)) {
-		return this.torneos.get(i);
-	    }
-	    i++;
+    private Equipo buscarEquipo(String nombre) throws SQLException {
+	Equipo equipo = this.equipoRepo.findByNombre(nombre);
+	if (equipo != null) {
+	    return equipo;
 	}
-	return this.torneoRepo.findByNombre(nombreTorneo);
+	throw new SQLException("El Equipo no existe");
     }
 
-    public void asignarCapitanEquipo(String nombreEquipo, String nroDocumento) {
-	Jugador jugador = this.buscarJugador(nroDocumento);
-	Equipo equipo = this.buscarEquipo(nombreEquipo);
-	if (jugador != null && equipo != null && equipo.getCapitan() == null && equipo.tenesJugador(jugador)) {
-	    equipo.asignarCapitanDeEquipo(jugador);
-	    // this.equipoRepo.saveCapitanDeEquipo(jugador.getNroDocumento(),
-	    // equipo.getIdEquipo()); /// HAY
-	    /// QUE
-	    /// REVISAR
-	    /// SI
-	    /// ESTA
-	    /// PERSISTENCIA
-	    /// ESTA
-	    /// BIEN
+    private Torneo buscarTorneo(Integer idTorneo) throws SQLException {
+	Torneo torneo = this.torneoRepo.findOne(idTorneo);
+	if (torneo != null) {
+	    return torneo;
 	}
+	throw new SQLException("El Torneo no existe");
     }
 
-    public void desasociarJugadorDeEquipo(String nombreEquipo, String nroDocumento) {
-	Jugador jugador = this.buscarJugador(nroDocumento);
-	Equipo equipo = this.buscarEquipo(nombreEquipo);
-	if (jugador != null && equipo != null && equipo.tenesJugador(jugador)) {
-	    equipo.desasociarJugadorDeEquipo(jugador);
-	    jugador.desasociarEquipoDeJugador();
-	    // this.jugadorRepo.removeEquipoJugador(jugador.getNroDocumento());
-	    // /// HAY
-	    /// QUE
-	    /// REVISAR
-	    /// SI
-	    /// ESTA
-	    /// PERSISTENCIA
-	    /// ESTA
-	    /// BIEN
-	}
-    }
-
-    public void crearGol(Integer cantidadGoles, Integer idPartido, String nroDocumento) {
+    public void cargarGoles(Integer cantidadGoles, Integer idPartido, String nroDocumento) throws SQLException {
 	Partido partido = this.buscarPartido(idPartido);
 	Jugador jugador = this.buscarJugador(nroDocumento);
-	Gol gol = new Gol(cantidadGoles, partido, jugador);
-
-    }
-
-    private Partido buscarPartido(Integer idPartido) {
-	int i = 0;
-	while (i < this.partidos.size()) {
-	    if (this.partidos.get(i).sosElPartido(idPartido)) {
-		return this.partidos.get(i);
-	    }
-	    i++;
+	for (int i = 0; i < cantidadGoles; i++) {
+	    this.golRepo.save(new GolFactory().withPartido(partido).withJugador(jugador).build());
 	}
-	return this.partidoRepo.findOne(idPartido);
     }
 
-    public void cargarResultados(String nombreTorneo, Integer nroFecha, String nombreEquipoA, String nombreEquipoB) {
+    public void cargarTarjetaRoja(Integer idPartido, String nroDocumento, String tipoTarjeta) throws SQLException {
+	Partido partido = this.buscarPartido(idPartido);
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	this.tarjetaRepo.save(
+		new TarjetaFactory().withPartido(partido).withJugador(jugador).withTarjeta(TipoTarjeta.ROJA).build());
+    }
 
+    public void cargarTarjetaAmarilla(Integer idPartido, String nroDocumento, String tipoTarjeta) throws SQLException {
+	Partido partido = this.buscarPartido(idPartido);
+	Jugador jugador = this.buscarJugador(nroDocumento);
+	this.tarjetaRepo.save(new TarjetaFactory().withPartido(partido).withJugador(jugador)
+		.withTarjeta(TipoTarjeta.AMARILLA).build());
+    }
+
+    // estadisticas (goles jugador, tarjetas jugador, goles equipo, tarjetas
+    // equipo
+
+    public EstadisticaJugador estadisticasJugador(String nroDocumento) {
+	Map<String, Integer> tarjetas = this.tarjetasJugador(nroDocumento);
+	return new EstadisticaJugador(this.golesJugador(nroDocumento), tarjetas.get("Tarjetas Rojas"),
+		tarjetas.get("Tarjetas Amarillas"));
+    }
+
+    public EstadisticasEquipo estadisticasEquipo(Integer idEquipo) throws SQLException {
+	List<EstadisticaJugador> estadisticas = new ArrayList<EstadisticaJugador>();
+	Equipo equipo = this.buscarEquipo(idEquipo);
+	equipo.getJugadores().forEach(jugador -> {
+	    estadisticas.add(this.estadisticasJugador(jugador.getNroDocumento()));
+	});
+	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.GANA_A)
+		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.GANA_B);
+	Integer partidosEmpatados = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.EMPATE)
+		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.EMPATE);
+	Integer partidosPerdidos = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.GANA_B)
+		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.GANA_A);
+	return new EstadisticasEquipo(estadisticas, partidosGanados, partidosEmpatados, partidosPerdidos);
+    }
+
+    private Integer golesJugador(String nroDocumento) {
+	return this.golRepo.countByNroDocumento(nroDocumento);
+    }
+
+    public Map<String, Integer> tarjetasJugador(String nroDocumento) {
+	Map<String, Integer> tarjetas = new HashMap<String, Integer>();
+	tarjetas.put("Tarjetas Amarillas",
+		this.tarjetaRepo.countByNroDocumentoAndTipo(nroDocumento, TipoTarjeta.AMARILLA));
+	tarjetas.put("Tarjetas Rojas", this.tarjetaRepo.countByNroDocumentoAndTipo(nroDocumento, TipoTarjeta.ROJA));
+	return tarjetas;
+    }
+
+    private Partido buscarPartido(Integer idPartido) throws SQLException {
+	Partido partido = this.partidoRepo.findOne(idPartido);
+	if (partido != null) {
+	    return partido;
+	}
+	throw new SQLException("El partido no existe");
     }
 
 }

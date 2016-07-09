@@ -3,6 +3,8 @@ package seminario.futbol.model;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -17,6 +19,7 @@ public class Jugador {
 
     private Integer categoria;
     private String mail;
+    @Enumerated(EnumType.STRING)
     private EstadoJugador estado;
     private Date fechaNacimiento;
     private String nombre;
@@ -25,20 +28,49 @@ public class Jugador {
     @JoinColumn(name = "idEquipo")
     private Equipo equipo;
 
-    public Jugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre,
-	    String telefono) {
-	super();
-	this.nroDocumento = nroDocumento;
-	this.categoria = categoria;
-	this.mail = mail;
-	this.estado = EstadoJugador.HABILITADO;
-	this.fechaNacimiento = fechaNacimiento;
-	this.nombre = nombre;
-	this.telefono = telefono;
-    }
+    // public Jugador(String nroDocumento, Integer categoria, String mail, Date
+    // fechaNacimiento, String nombre,
+    // String telefono) {
+    // super();
+    // this.nroDocumento = nroDocumento;
+    // this.categoria = categoria;
+    // this.mail = mail;
+    // this.estado = EstadoJugador.HABILITADO;
+    // this.fechaNacimiento = fechaNacimiento;
+    // this.nombre = nombre;
+    // this.telefono = telefono;
+    // }
 
     public String getNroDocumento() {
 	return nroDocumento;
+    }
+
+    public void setNroDocumento(String nroDocumento) {
+	this.nroDocumento = nroDocumento;
+    }
+
+    public void setCategoria(Integer categoria) {
+	this.categoria = categoria;
+    }
+
+    public void setMail(String mail) {
+	this.mail = mail;
+    }
+
+    public void setEstado(EstadoJugador estado) {
+	this.estado = estado;
+    }
+
+    public void setFechaNacimiento(Date fechaNacimiento) {
+	this.fechaNacimiento = fechaNacimiento;
+    }
+
+    public void setNombre(String nombre) {
+	this.nombre = nombre;
+    }
+
+    public void setTelefono(String telefono) {
+	this.telefono = telefono;
     }
 
     public Integer getCategoria() {
@@ -77,7 +109,7 @@ public class Jugador {
 	return this.equipo != null;
     }
 
-    public void desasociarEquipoDeJugador() {
+    public void desasociarEquipo() {
 	this.equipo = null;
 
     }

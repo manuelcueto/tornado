@@ -11,12 +11,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import seminario.futbol.model.factories.PartidoFactory;
+
 @Entity
 @Table(name = "torneos")
 public class Torneo {
 
     private static final int MAX_EQUIPOS = 10;
-    
+
     @Id
     private Integer idTorneo;
     private String nombre;
@@ -60,4 +62,38 @@ public class Torneo {
 	this.canchas.add(cancha);
     }
 
+    public boolean publicable() {
+	return EstadoTorneo.NO_INICIADO == this.estado && this.equipos.size() > 1 && this.esPar(this.equipos.size());
+    }
+
+    public List<Partido> publicar() {
+	List<Partido> partidos = new ArrayList<Partido>();
+	int cantEquipos = this.equipos.size();
+	Date fechaRonda = this.inicio;
+
+	// cada iteracion externa es una ronda de partidos
+	for (int i = 0; i < cantEquipos - 1; i++) {
+	    for (int j = 0; j < cantEquipos / 2; j++) {
+		partidos.add(new PartidoFactory().withTorneo(this).withNroFecha(i + 1).withFecha(fechaRonda)
+			.withCancha(new Cancha()).withArbitro(new Arbitro()).withEquipoA(this.equipos.get(j))
+			.withEquipoB(this.equipos.get(cantEquipos - 1 - j)).build());
+
+	    }
+	    this.reordenar(i);
+	    // agregar 7 dias
+	}
+	return partidos;
+    }
+
+    public void iniciarTorneo() {
+	this.estado = EstadoTorneo.INICIADO;
+    }
+
+    private boolean esPar(int numero) {
+	return numero % 2 == 0;
+    }
+
+    private void reordenar(int ronda) {
+	this.equipos.add(ronda + 1, this.equipos.get(this.equipos.size() - 1));
+    }
 }
