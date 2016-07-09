@@ -88,7 +88,7 @@ public class TornadoService {
 	this.equipoRepo.delete(idEquipo);
     }
 
-    public void asignarCapitanAEquipo(String nombreEquipo, String nroDocumento) throws SQLException {
+    public void asociarCapitanAEquipo(String nombreEquipo, String nroDocumento) throws SQLException {
 	Jugador jugador = this.buscarJugador(nroDocumento);
 	Equipo equipo = this.buscarEquipo(nombreEquipo);
 	if (!equipo.hasCapitan() && equipo.hasJugador(jugador)) {
@@ -107,7 +107,7 @@ public class TornadoService {
 	}
     }
 
-    public void asignarJugadorAEquipo(Integer idEquipo, String nroDocumento) throws SQLException {
+    public void asociarJugadorAEquipo(Integer idEquipo, String nroDocumento) throws SQLException {
 	Jugador jugador = this.buscarJugador(nroDocumento);
 	Equipo equipo = this.buscarEquipo(idEquipo);
 	if (equipo.noEstaCompleto() && !jugador.tieneEquipo()) {
@@ -185,46 +185,6 @@ public class TornadoService {
 
     public Iterable<Partido> listarPartidos(Integer idTorneo) {
 	return this.partidoRepo.findByTorneo(idTorneo);
-    }
-
-    private boolean existeJugador(String nroDocumento) {
-	return this.jugadorRepo.findOne(nroDocumento) != null;
-    }
-
-    private Cancha buscarCancha(String nombre) {
-	return this.canchaRepo.findByNombre(nombre);
-    }
-
-    private Jugador buscarJugador(String nroDocumento) throws SQLException {
-	Jugador jugador = this.jugadorRepo.findOne(nroDocumento);
-	if (jugador != null) {
-	    return jugador;
-	}
-	throw new SQLException("El Jugador no existe");
-    }
-
-    private Equipo buscarEquipo(Integer idEquipo) throws SQLException {
-	Equipo equipo = this.equipoRepo.findOne(idEquipo);
-	if (equipo != null) {
-	    return equipo;
-	}
-	throw new SQLException("El Equipo no existe");
-    }
-
-    private Equipo buscarEquipo(String nombre) throws SQLException {
-	Equipo equipo = this.equipoRepo.findByNombre(nombre);
-	if (equipo != null) {
-	    return equipo;
-	}
-	throw new SQLException("El Equipo no existe");
-    }
-
-    private Torneo buscarTorneo(Integer idTorneo) throws SQLException {
-	Torneo torneo = this.torneoRepo.findOne(idTorneo);
-	if (torneo != null) {
-	    return torneo;
-	}
-	throw new SQLException("El Torneo no existe");
     }
 
     public void cargarGoles(Integer cantidadGoles, Integer idPartido, String nroDocumento) throws SQLException {
@@ -354,6 +314,46 @@ public class TornadoService {
 	    }
 	});
 	return new TablaGeneral(torneo.getNombre(), metricasEquipos);
+    }
+
+    private boolean existeJugador(String nroDocumento) {
+	return this.jugadorRepo.findOne(nroDocumento) != null;
+    }
+
+    private Cancha buscarCancha(String nombre) {
+	return this.canchaRepo.findByNombre(nombre);
+    }
+
+    private Jugador buscarJugador(String nroDocumento) throws SQLException {
+	Jugador jugador = this.jugadorRepo.findOne(nroDocumento);
+	if (jugador != null) {
+	    return jugador;
+	}
+	throw new SQLException("El Jugador no existe");
+    }
+
+    private Equipo buscarEquipo(Integer idEquipo) throws SQLException {
+	Equipo equipo = this.equipoRepo.findOne(idEquipo);
+	if (equipo != null) {
+	    return equipo;
+	}
+	throw new SQLException("El Equipo no existe");
+    }
+
+    private Equipo buscarEquipo(String nombre) throws SQLException {
+	Equipo equipo = this.equipoRepo.findByNombre(nombre);
+	if (equipo != null) {
+	    return equipo;
+	}
+	throw new SQLException("El Equipo no existe");
+    }
+
+    private Torneo buscarTorneo(Integer idTorneo) throws SQLException {
+	Torneo torneo = this.torneoRepo.findOne(idTorneo);
+	if (torneo != null) {
+	    return torneo;
+	}
+	throw new SQLException("El Torneo no existe");
     }
 
     private Integer golesJugador(String nroDocumento) throws SQLException {

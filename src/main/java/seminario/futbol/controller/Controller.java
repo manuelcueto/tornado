@@ -1,5 +1,6 @@
 package seminario.futbol.controller;
 
+import java.sql.SQLException;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,46 @@ public class Controller {
     @RequestMapping(value = "/canchas", method = RequestMethod.GET)
     public Iterable<Cancha> listarCanchas() {
 	return this.tornadoService.listarCanchas();
+    }
+
+    @RequestMapping(value = "/equipos", method = RequestMethod.PUT)
+    public void crearEquipo(@RequestParam String nombre, @RequestParam Integer categoria) {
+	this.tornadoService.crearEquipo(nombre, categoria);
+    }
+
+    @RequestMapping(value = "/equipos/{idEquipo}", method = RequestMethod.DELETE)
+    public void borrarEquipo(@PathVariable("idEquipo") Integer idEquipo) {
+	this.tornadoService.borrarEquipo(idEquipo);
+    }
+
+    @RequestMapping(value = "/equipos/{nombreEquipo}/capitan", method = RequestMethod.PUT)
+    public void asignarCapitanAEquipo(@PathVariable("nombreEquipo") String nombreEquipo,
+	    @RequestParam String nroDocumento) {
+	try {
+	    this.tornadoService.asociarCapitanAEquipo(nombreEquipo, nroDocumento);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    @RequestMapping(value = "/equipos/{idEquipo}/jugadores", method = RequestMethod.DELETE)
+    public void desasociarJugadorDeEquipo(@PathVariable("idEquipo") Integer idEquipo,
+	    @RequestParam("nroDocumento") String nroDocumento) {
+	try {
+	    this.tornadoService.desasociarJugadorDeEquipo(idEquipo, nroDocumento);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    @RequestMapping(value = "/equipos/{idEquipo}/jugadores", method = RequestMethod.PUT)
+    public void asociarJugadorAEquipo(@PathVariable("idEquipo") Integer idEquipo,
+	    @RequestParam("nroDocumento") String nroDocumento) {
+	try {
+	    this.tornadoService.asociarJugadorAEquipo(idEquipo, nroDocumento);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
     }
 
     @RequestMapping("/crear-torneo")
