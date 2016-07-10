@@ -244,19 +244,21 @@ public class TornadoService {
 		e.printStackTrace();
 	    }
 	});
-	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.GANA_A)
-		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.GANA_B);
-	Integer partidosEmpatados = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.EMPATE)
-		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.EMPATE);
-	Integer partidosPerdidos = this.partidoRepo.countByEquipoAAndResultado(equipo.getIdEquipo(), Resultado.GANA_B)
-		+ this.partidoRepo.countByEquipoBAndResultado(equipo.getIdEquipo(), Resultado.GANA_A);
-	return new EstadisticasEquipo(estadisticas, partidosGanados, partidosEmpatados, partidosPerdidos);
+	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultado(equipo, Resultado.GANA_A)
+		+ this.partidoRepo.countByEquipoBAndResultado(equipo, Resultado.GANA_B);
+	Integer partidosEmpatados = this.partidoRepo.countByEquipoAAndResultado(equipo, Resultado.EMPATE)
+		+ this.partidoRepo.countByEquipoBAndResultado(equipo, Resultado.EMPATE);
+	Integer partidosPerdidos = this.partidoRepo.countByEquipoAAndResultado(equipo, Resultado.GANA_B)
+		+ this.partidoRepo.countByEquipoBAndResultado(equipo, Resultado.GANA_A);
+	return new EstadisticasEquipo(equipo.getNombre(), estadisticas, partidosGanados, partidosEmpatados,
+		partidosPerdidos);
     }
 
     public EstadisticasEquipo estadisticasEquipo(Integer idEquipo, Integer idTorneo) throws SQLException {
 
 	List<EstadisticasJugador> estadisticas = new ArrayList<EstadisticasJugador>();
 	Equipo equipo = this.buscarEquipo(idEquipo);
+	Torneo torneo = this.buscarTorneo(idTorneo);
 	equipo.getJugadores().forEach(jugador -> {
 	    try {
 		estadisticas.add(this.estadisticasJugador(jugador.getNroDocumento()));
@@ -264,19 +266,14 @@ public class TornadoService {
 		e.printStackTrace();
 	    }
 	});
-	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo.getIdEquipo(),
-		Resultado.GANA_A, idTorneo)
-		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo.getIdEquipo(), Resultado.GANA_B,
-			idTorneo);
-	Integer partidosEmpatados = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo.getIdEquipo(),
-		Resultado.EMPATE, idTorneo)
-		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo.getIdEquipo(), Resultado.EMPATE,
-			idTorneo);
-	Integer partidosPerdidos = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo.getIdEquipo(),
-		Resultado.GANA_B, idTorneo)
-		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo.getIdEquipo(), Resultado.GANA_A,
-			idTorneo);
-	return new EstadisticasEquipo(estadisticas, partidosGanados, partidosEmpatados, partidosPerdidos);
+	Integer partidosGanados = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo, Resultado.GANA_A, torneo)
+		+ this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo, Resultado.GANA_B, torneo);
+	Integer partidosEmpatados = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo, Resultado.EMPATE,
+		torneo) + this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo, Resultado.EMPATE, torneo);
+	Integer partidosPerdidos = this.partidoRepo.countByEquipoAAndResultadoAndTorneo(equipo, Resultado.GANA_B,
+		torneo) + this.partidoRepo.countByEquipoBAndResultadoAndTorneo(equipo, Resultado.GANA_A, torneo);
+	return new EstadisticasEquipo(equipo.getNombre(), estadisticas, partidosGanados, partidosEmpatados,
+		partidosPerdidos);
     }
 
     public EstadisticasPartido estadisticasPartido(Integer idPartido) throws SQLException {

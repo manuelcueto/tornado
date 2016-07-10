@@ -2,7 +2,6 @@ package seminario.futbol.model;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -117,15 +116,8 @@ public class Partido {
     public Resultado jugarPartido() {
 	long golesEquipoA = 0;
 	long golesEquipoB = 0;
-	Stream<String> golesEquipo = this.goles.stream().map(gol -> {
-	    if (this.equipoA.hasJugador(gol.getJugador())) {
-		return "A";
-	    } else {
-		return "B";
-	    }
-	});
-	golesEquipoA = golesEquipo.filter(string -> string.equals("A")).count();
-	golesEquipoB = golesEquipo.filter(string -> string.equals("B")).count();
+	golesEquipoA = this.goles.stream().filter(gol -> this.equipoA.hasJugador(gol.getJugador())).count();
+	golesEquipoB = this.goles.stream().filter(gol -> this.equipoB.hasJugador(gol.getJugador())).count();
 
 	if (golesEquipoA == golesEquipoB) {
 	    return Resultado.EMPATE;
