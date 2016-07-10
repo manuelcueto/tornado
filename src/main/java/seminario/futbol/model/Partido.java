@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -17,6 +19,7 @@ import javax.persistence.Table;
 public class Partido {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idPartido;
 
     @OneToOne
@@ -44,10 +47,6 @@ public class Partido {
 
     public void setResultado(Resultado resultado) {
 	this.resultado = resultado;
-    }
-
-    public void setIdPartido(Integer idPartido) {
-	this.idPartido = idPartido;
     }
 
     public void setEquipoA(Equipo equipoA) {

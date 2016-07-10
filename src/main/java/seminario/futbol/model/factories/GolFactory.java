@@ -17,6 +17,9 @@ public class GolFactory extends Gol {
     }
 
     public Gol build() {
-	return this;
+	Gol gol = new Gol();
+	gol.setJugador(this.getJugador());
+	gol.setPartido(this.getPartido());
+	return gol;
     }
 }

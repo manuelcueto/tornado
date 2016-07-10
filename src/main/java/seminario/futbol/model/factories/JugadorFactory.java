@@ -2,6 +2,7 @@ package seminario.futbol.model.factories;
 
 import java.util.Date;
 
+import seminario.futbol.model.EstadoJugador;
 import seminario.futbol.model.Jugador;
 
 public class JugadorFactory extends Jugador {
@@ -37,6 +38,14 @@ public class JugadorFactory extends Jugador {
     }
 
     public Jugador build() {
-	return this;
+	Jugador jugador = new Jugador();
+	jugador.setEstado(EstadoJugador.HABILITADO);
+	jugador.setCategoria(this.getCategoria());
+	jugador.setFechaNacimiento(this.getFechaNacimiento());
+	jugador.setMail(this.getMail());
+	jugador.setNombre(this.getMail());
+	jugador.setTelefono(this.getTelefono());
+	jugador.setNroDocumento(this.getNroDocumento());
+	return jugador;
     }
 }

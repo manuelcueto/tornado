@@ -1,6 +1,8 @@
 package seminario.futbol.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -9,11 +11,32 @@ import javax.persistence.Table;
 public class Cancha {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idCancha;
     private String direccion;
     private String nombre;
     private String telefono;
     private String dueno;
+
+    public Integer getIdCancha() {
+	return idCancha;
+    }
+
+    public String getDireccion() {
+	return direccion;
+    }
+
+    public String getNombre() {
+	return nombre;
+    }
+
+    public String getTelefono() {
+	return telefono;
+    }
+
+    public String getDueno() {
+	return dueno;
+    }
 
     public void setDireccion(String direccion) {
 	this.direccion = direccion;

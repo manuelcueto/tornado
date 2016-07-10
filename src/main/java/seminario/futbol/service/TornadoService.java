@@ -27,6 +27,7 @@ import seminario.futbol.model.factories.EquipoFactory;
 import seminario.futbol.model.factories.GolFactory;
 import seminario.futbol.model.factories.JugadorFactory;
 import seminario.futbol.model.factories.TarjetaFactory;
+import seminario.futbol.model.factories.TorneoFactory;
 import seminario.futbol.repositories.CanchaRepository;
 import seminario.futbol.repositories.EquipoRepository;
 import seminario.futbol.repositories.GolRepository;
@@ -62,8 +63,9 @@ public class TornadoService {
 		.save(fact.withNombre(nombre).withDireccion(direccion).withDueno(dueno).withTelefono(telefono).build());
     }
 
-    public void modificarCancha(Integer idCancha, String nombre, String direccion, String dueno, String telefono) {
-	this.canchaRepo.modificarCancha(dueno, telefono, nombre, direccion, idCancha);
+    public void modificarCancha(Integer idCancha, Cancha cancha) {
+	this.canchaRepo.modificarCancha(cancha.getDueno(), cancha.getTelefono(), cancha.getNombre(),
+		cancha.getDireccion(), idCancha);
     }
 
     public void borrarCancha(Integer idCancha) {
@@ -81,7 +83,10 @@ public class TornadoService {
 	if (this.equipoRepo.findByNombre(nombre) == null) {
 	    Equipo equipo = new EquipoFactory().withNombre(nombre).withCategoria(categoria).build();
 	    this.equipoRepo.save(equipo);
+	} else {
+	    throw new IllegalArgumentException("Ya existe equipo con ese nombre");
 	}
+
     }
 
     public void borrarEquipo(Integer idEquipo) {
@@ -145,13 +150,15 @@ public class TornadoService {
 
     public void crearTorneo(String nombre, Date fechaInicio, String descripcion, Integer categoria) {
 	if (!this.existeTorneo(nombre)) {
-	    Torneo torneo = new Torneo(nombre, fechaInicio, descripcion, categoria);
+	    Torneo torneo = new TorneoFactory().withNombre(nombre).withDescripcion(descripcion).withInicio(fechaInicio)
+		    .withCategoria(categoria).build();
 	    this.torneoRepo.save(torneo);
 	}
     }
 
     public boolean existeTorneo(String nombreTorneo) {
-	return this.torneoRepo.findByNombre(nombreTorneo) != null;
+	Torneo torneo = this.torneoRepo.findByNombre(nombreTorneo);
+	return torneo != null;
     }
 
     public void asignarEquipoATorneo(Integer idEquipo, Integer idTorneo) throws SQLException {
@@ -178,7 +185,6 @@ public class TornadoService {
 	Torneo torneo = this.buscarTorneo(idTorneo);
 	if (torneo.publicable()) {
 	    List<Partido> partidos = torneo.publicar();
-	    this.partidoRepo.save(partidos);
 	    torneo.iniciarTorneo();
 	}
     }
@@ -195,14 +201,15 @@ public class TornadoService {
 	}
     }
 
-    public void cargarTarjetaRoja(Integer idPartido, String nroDocumento, String tipoTarjeta) throws SQLException {
+    public void cargarTarjetaRoja(Integer idPartido, String nroDocumento, TipoTarjeta tipoTarjeta) throws SQLException {
 	Partido partido = this.buscarPartido(idPartido);
 	Jugador jugador = this.buscarJugador(nroDocumento);
 	this.tarjetaRepo.save(
 		new TarjetaFactory().withPartido(partido).withJugador(jugador).withTarjeta(TipoTarjeta.ROJA).build());
     }
 
-    public void cargarTarjetaAmarilla(Integer idPartido, String nroDocumento, String tipoTarjeta) throws SQLException {
+    public void cargarTarjetaAmarilla(Integer idPartido, String nroDocumento, TipoTarjeta tipoTarjeta)
+	    throws SQLException {
 	Partido partido = this.buscarPartido(idPartido);
 	Jugador jugador = this.buscarJugador(nroDocumento);
 	this.tarjetaRepo.save(new TarjetaFactory().withPartido(partido).withJugador(jugador)

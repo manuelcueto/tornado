@@ -25,6 +25,11 @@ public class CanchaFactory extends Cancha {
     }
 
     public Cancha build() {
-	return this;
+	Cancha cancha = new Cancha();
+	cancha.setDireccion(this.getDireccion());
+	cancha.setDueno(this.getDueno());
+	cancha.setNombre(this.getNombre());
+	cancha.setTelefono(this.getTelefono());
+	return cancha;
     }
 }

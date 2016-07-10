@@ -7,11 +7,21 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import seminario.futbol.model.factories.PartidoFactory;
+import seminario.futbol.repositories.PartidoRepository;
 
 @Entity
 @Table(name = "torneos")
@@ -19,35 +29,73 @@ public class Torneo {
 
     private static final int MAX_EQUIPOS = 10;
 
+    @Autowired
+    @Transient
+    private PartidoRepository partidoRepo;
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idTorneo;
     private String nombre;
     private EstadoTorneo estado;
     private String descripcion;
     private Integer categoria;
     private Date inicio;
-    @Transient
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "canchasTorneo", joinColumns = {
+	    @JoinColumn(name = "idTorneo", nullable = false, updatable = false) }, inverseJoinColumns = {
+		    @JoinColumn(name = "idCancha", nullable = false, updatable = false) })
     private List<Cancha> canchas;
-    @Transient
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "arbitrosTorneo", joinColumns = {
+	    @JoinColumn(name = "idTorneo", nullable = false, updatable = false) }, inverseJoinColumns = {
+		    @JoinColumn(name = "idArbitro", nullable = false, updatable = false) })
     private List<Arbitro> arbitro;
-    @Transient
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "equiposTorneo", joinColumns = {
+	    @JoinColumn(name = "idTorneo", nullable = false, updatable = false) }, inverseJoinColumns = {
+		    @JoinColumn(name = "idEquipo", nullable = false, updatable = false) })
     private List<Equipo> equipos;
-    @Transient
-    private List<Posicion> posiciones;
+
     @Transient
     private List<Suspension> suspensiones;
 
-    public Torneo(String nombre, Date fechaInicio, String descripcion, Integer categoria) {
-	this.nombre = nombre;
-	this.inicio = fechaInicio;
-	this.descripcion = descripcion;
-	this.categoria = categoria;
-	this.estado = NO_INICIADO;
-	this.equipos = new ArrayList<Equipo>();
-    }
-
     public String getNombre() {
 	return this.nombre;
+    }
+
+    public Integer getIdTorneo() {
+	return this.idTorneo;
+    }
+
+    public String getDescripcion() {
+	return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+	this.descripcion = descripcion;
+    }
+
+    public Integer getCategoria() {
+	return categoria;
+    }
+
+    public void setCategoria(Integer categoria) {
+	this.categoria = categoria;
+    }
+
+    public Date getInicio() {
+	return inicio;
+    }
+
+    public void setInicio(Date inicio) {
+	this.inicio = inicio;
+    }
+
+    public void setNombre(String nombre) {
+	this.nombre = nombre;
     }
 
     public boolean equipoAgregable(Equipo equipo) {
@@ -74,13 +122,16 @@ public class Torneo {
 	// cada iteracion externa es una ronda de partidos
 	for (int i = 0; i < cantEquipos - 1; i++) {
 	    for (int j = 0; j < cantEquipos / 2; j++) {
-		partidos.add(new PartidoFactory().withTorneo(this).withNroFecha(i + 1).withFecha(fechaRonda)
-			.withCancha(new Cancha()).withArbitro(new Arbitro()).withEquipoA(this.equipos.get(j))
-			.withEquipoB(this.equipos.get(cantEquipos - 1 - j)).build());
+
+		Partido partido = partidoRepo.save(new PartidoFactory().withTorneo(this).withNroFecha(i + 1)
+			.withFecha(fechaRonda).withCancha(new Cancha()).withArbitro(new Arbitro())
+			.withEquipoA(this.equipos.get(j)).withEquipoB(this.equipos.get(cantEquipos - 1 - j))
+			.withNroFecha(i * (cantEquipos) + j + 1).build());
+		partidos.add(partido);
 
 	    }
 	    this.reordenar(i);
-	    // agregar 7 dias
+	    fechaRonda = DateUtils.addDays(fechaRonda, 7);
 	}
 	return partidos;
     }

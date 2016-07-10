@@ -47,7 +47,15 @@ public class PartidoFactory extends Partido {
     }
 
     public Partido build() {
-	this.setResultado(Resultado.NO_JUGADO);
-	return this;
+	Partido partido = new Partido();
+	partido.setArbitro(this.getArbitro());
+	partido.setCancha(this.getCancha());
+	partido.setEquipoA(this.getEquipoA());
+	partido.setEquipoB(this.getEquipoB());
+	partido.setFecha(this.getFecha());
+	partido.setNroFecha(this.getNroFecha());
+	partido.setTorneo(this.getTorneo());
+	partido.setResultado(Resultado.NO_JUGADO);
+	return partido;
     }
 }

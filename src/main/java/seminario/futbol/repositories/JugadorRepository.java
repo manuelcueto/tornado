@@ -11,22 +11,12 @@ public interface JugadorRepository extends CrudRepository<Jugador, String> {
 
     public Jugador findByNroDocumentoAndEquipoIsNull(String nroDocumento);
 
-    // @Modifying
-    // @Query("update jugadores j set j.idEquipo = ?1 where j.nroDocumento =
-    // ?2")
-    // public int setEquipo(Integer idEquipo, String nroDocumento);
-    //
-    // @Modifying
-    // @Query("update jugadores set equipo = ?1 where jugadores.nroDocumento
-    // =?2")
-    // public void saveEquipoJugador(Integer idEquipo, String nroDocumento);
-    //
     @Modifying
-    @Query("update Jugador j set j.equipo = null where j.nroDocumento =?")
+    @Query("update Jugador j set j.equipo = null where j.nroDocumento =?1")
     public void removeEquipoJugador(String nroDocumento);
 
     @Modifying
-    @Query("update Jugador j set j.equipo = ? where j.nroDocumento =?")
+    @Query("update Jugador j set j.equipo = ?2 where j.nroDocumento =?1")
     public void update(String nroDocumento, Equipo equipo);
 
 }

@@ -15,6 +15,9 @@ public class EquipoFactory extends Equipo {
     }
 
     public Equipo build() {
-	return this;
+	Equipo equipo = new Equipo();
+	equipo.setNombre(this.getNombre());
+	equipo.setCategoria(this.getCategoria());
+	return equipo;
     }
 }

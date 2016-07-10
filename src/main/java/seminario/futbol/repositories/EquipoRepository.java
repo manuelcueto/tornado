@@ -12,7 +12,7 @@ public interface EquipoRepository extends CrudRepository<Equipo, Integer> {
     public Equipo findByNombre(String nombre);
 
     @Modifying
-    @Query("update Equipo e set e.capitan=? where e.idEquipo=?")
+    @Query("update Equipo e set e.capitan=?1 where e.idEquipo=?2")
     public void update(Jugador capitan, Integer idEquipo);
 
 }
