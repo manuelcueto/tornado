@@ -19,4 +19,8 @@ public interface JugadorRepository extends CrudRepository<Jugador, String> {
     @Query("update Jugador j set j.equipo = ?2 where j.nroDocumento =?1")
     public void update(String nroDocumento, Equipo equipo);
 
+    public Iterable<Jugador> findByEquipo(Equipo equipo);
+
+    public Iterable<Jugador> findByEquipoIsNull();
+
 }

@@ -1,6 +1,8 @@
 package seminario.futbol.model;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +18,16 @@ public class Arbitro {
     private String email;
     private String nombre;
     private String telefono;
+    @Enumerated(EnumType.STRING)
+    private Estado estado;
+
+    public Estado getEstado() {
+	return estado;
+    }
+
+    public void setEstado(Estado estado) {
+	this.estado = estado;
+    }
 
     public String getEmail() {
 	return email;

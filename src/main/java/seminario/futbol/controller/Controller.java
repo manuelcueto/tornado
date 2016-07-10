@@ -73,7 +73,7 @@ public class Controller {
 	return new Response<Iterable<Arbitro>>(this.tornadoService.listarArbitros());
     }
 
-    @RequestMapping(value = "/arbitros", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/arbitros", method = RequestMethod.POST)
     public void borrarArbitro(@RequestBody Arbitro arbitro) {
 	this.tornadoService.borrarArbitro(arbitro);
     }
@@ -97,7 +97,7 @@ public class Controller {
 	}
     }
 
-    @RequestMapping(value = "/equipos/{idEquipo}/jugadores", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/equipos/{idEquipo}/jugadores", method = RequestMethod.POST)
     public void desasociarJugadorDeEquipo(@PathVariable("idEquipo") Integer idEquipo, @RequestBody Jugador jugador) {
 	try {
 	    this.tornadoService.desasociarJugadorDeEquipo(idEquipo, jugador.getNroDocumento());
@@ -131,7 +131,7 @@ public class Controller {
 	return new Response<Boolean>(this.tornadoService.existeJugador(nroDocumento));
     }
 
-    @RequestMapping(value = "/jugadores", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/jugadores", method = RequestMethod.POST)
     public void borrarJugador(@RequestBody Jugador jugador) {
 	this.tornadoService.borrarJugador(jugador.getNroDocumento());
     }
@@ -139,6 +139,16 @@ public class Controller {
     @RequestMapping(value = "/jugadores", method = RequestMethod.GET)
     public Response<Iterable<Jugador>> listarJugadores() {
 	return new Response<Iterable<Jugador>>(this.tornadoService.listarJugadores());
+    }
+
+    @RequestMapping(value = "/equipos/{idEquipo}/jugadores", method = RequestMethod.GET)
+    public Response<Iterable<Jugador>> listarJugadores(@PathVariable("idEquipo") Integer idEquipo) throws SQLException {
+	return new Response<Iterable<Jugador>>(this.tornadoService.listarJugadores(idEquipo));
+    }
+
+    @RequestMapping(value = "/equipos/jugadores", method = RequestMethod.GET)
+    public Response<Iterable<Jugador>> listarJugadoresSinEquipo() throws SQLException {
+	return new Response<Iterable<Jugador>>(this.tornadoService.listarJugadoresSinEquipo());
     }
 
     @RequestMapping(value = "/torneos", method = RequestMethod.POST)
@@ -196,9 +206,10 @@ public class Controller {
 	this.tornadoService.jugarPartido(idPartido);
     }
 
-    @RequestMapping(value = "/estadisticas/jugadores", method = RequestMethod.POST)
-    public Response<EstadisticasJugador> obtenerEstadisticasJugador(@RequestBody Jugador jugador) throws SQLException {
-	return new Response<EstadisticasJugador>(this.tornadoService.estadisticasJugador(jugador.getNroDocumento()));
+    @RequestMapping(value = "/estadisticas/jugadores/{nroDocumento}", method = RequestMethod.POST)
+    public Response<EstadisticasJugador> obtenerEstadisticasJugador(@PathVariable("nroDocumento") String nroDocumento)
+	    throws SQLException {
+	return new Response<EstadisticasJugador>(this.tornadoService.estadisticasJugador(nroDocumento));
     }
 
     @RequestMapping(value = "/estadisticas/equipos", method = RequestMethod.POST)

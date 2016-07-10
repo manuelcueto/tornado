@@ -1,6 +1,8 @@
 package seminario.futbol.model;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,6 +19,9 @@ public class Cancha {
     private String nombre;
     private String telefono;
     private String dueno;
+
+    @Enumerated(EnumType.STRING)
+    private Estado estado;
 
     public Integer getIdCancha() {
 	return idCancha;
@@ -52,6 +57,14 @@ public class Cancha {
 
     public void setDueno(String dueno) {
 	this.dueno = dueno;
+    }
+
+    public Estado getEstado() {
+	return estado;
+    }
+
+    public void setEstado(Estado estado) {
+	this.estado = estado;
     }
 
     public boolean sosLaCancha(String nombreCancha) {

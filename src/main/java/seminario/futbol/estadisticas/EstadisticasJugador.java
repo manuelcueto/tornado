@@ -18,6 +18,10 @@ public class EstadisticasJugador {
 	return goles;
     }
 
+    public String getNombre() {
+	return nombre;
+    }
+
     public Integer getTarjetasRojas() {
 	return tarjetasRojas;
     }

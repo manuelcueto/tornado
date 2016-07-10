@@ -18,6 +18,7 @@ import seminario.futbol.estadisticas.TablaGeneral;
 import seminario.futbol.model.Arbitro;
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
+import seminario.futbol.model.Estado;
 import seminario.futbol.model.EstadoJugador;
 import seminario.futbol.model.Jugador;
 import seminario.futbol.model.Partido;
@@ -61,6 +62,7 @@ public class TornadoService {
     // canchas: crear, modificar, borrar, listar
 
     public void crearCancha(Cancha cancha) {
+	cancha.setEstado(Estado.ACTIVO);
 	this.canchaRepo.save(cancha);
     }
 
@@ -74,11 +76,11 @@ public class TornadoService {
     }
 
     public void borrarCancha(Integer idCancha) {
-	this.canchaRepo.delete(idCancha);
+	this.canchaRepo.bajaLogica(idCancha, Estado.INACTIVO);
     }
 
     public Iterable<Cancha> listarCanchas() {
-	return this.canchaRepo.findAll();
+	return this.canchaRepo.findAllByEstado(Estado.ACTIVO);
     }
 
     // Equipos: Crear, borrar, elegir capitan, asociar jugador, desasociar
@@ -188,12 +190,25 @@ public class TornadoService {
     public void publicarTorneo(Integer idTorneo) throws SQLException {
 	Torneo torneo = this.buscarTorneo(idTorneo);
 	if (torneo.publicable()) {
-	    List<Cancha> canchas = (List<Cancha>) canchaRepo.findAll();
-	    List<Arbitro> arbitros = (List<Arbitro>) arbitroRepo.findAll();
-	    List<Partido> partidos = torneo.publicar(canchas, arbitros);
-	    this.partidoRepo.save(partidos);
-	    torneo.iniciarTorneo();
+	    List<Cancha> canchas = (List<Cancha>) canchaRepo.findAllByEstado(Estado.ACTIVO);
+	    List<Arbitro> arbitros = (List<Arbitro>) arbitroRepo.findAllByEstado(Estado.ACTIVO);
+	    if (canchas.size() > 0 && arbitros.size() > 0) {
+		List<Partido> partidos = torneo.publicar(canchas, arbitros);
+		this.partidoRepo.save(partidos);
+		torneo.iniciarTorneo();
+	    } else {
+		throw new IllegalStateException("No hay canchas o arbitros disponibles para iniciar un torneo");
+	    }
 	}
+    }
+
+    public Iterable<Jugador> listarJugadores(Integer idEquipo) throws SQLException {
+	Equipo equipo = this.buscarEquipo(idEquipo);
+	return this.jugadorRepo.findByEquipo(equipo);
+    }
+
+    public Iterable<Jugador> listarJugadoresSinEquipo() throws SQLException {
+	return this.jugadorRepo.findByEquipoIsNull();
     }
 
     public Iterable<Partido> listarPartidos(Integer idTorneo) {
@@ -329,6 +344,7 @@ public class TornadoService {
     }
 
     public void agregarArbitro(Arbitro arbitro) {
+	arbitro.setEstado(Estado.ACTIVO);
 	this.arbitroRepo.save(arbitro);
     }
 
@@ -337,11 +353,11 @@ public class TornadoService {
     }
 
     public void borrarArbitro(Arbitro arbitro) {
-	this.arbitroRepo.delete(arbitro);
+	this.arbitroRepo.bajaLogica(arbitro.getIdArbitro(), Estado.INACTIVO);
     }
 
     public Iterable<Arbitro> listarArbitros() {
-	return this.arbitroRepo.findAll();
+	return this.arbitroRepo.findAllByEstado(Estado.ACTIVO);
     }
 
     private Cancha buscarCancha(String nombre) {
