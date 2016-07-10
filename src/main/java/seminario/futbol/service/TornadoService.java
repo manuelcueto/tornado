@@ -15,19 +15,20 @@ import seminario.futbol.estadisticas.EstadisticasEquipo;
 import seminario.futbol.estadisticas.EstadisticasJugador;
 import seminario.futbol.estadisticas.EstadisticasPartido;
 import seminario.futbol.estadisticas.TablaGeneral;
+import seminario.futbol.model.Arbitro;
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
+import seminario.futbol.model.EstadoJugador;
 import seminario.futbol.model.Jugador;
 import seminario.futbol.model.Partido;
 import seminario.futbol.model.Resultado;
 import seminario.futbol.model.TipoTarjeta;
 import seminario.futbol.model.Torneo;
-import seminario.futbol.model.factories.CanchaFactory;
 import seminario.futbol.model.factories.EquipoFactory;
 import seminario.futbol.model.factories.GolFactory;
-import seminario.futbol.model.factories.JugadorFactory;
 import seminario.futbol.model.factories.TarjetaFactory;
 import seminario.futbol.model.factories.TorneoFactory;
+import seminario.futbol.repositories.ArbitroRepository;
 import seminario.futbol.repositories.CanchaRepository;
 import seminario.futbol.repositories.EquipoRepository;
 import seminario.futbol.repositories.GolRepository;
@@ -54,13 +55,17 @@ public class TornadoService {
     private GolRepository golRepo;
     @Autowired
     private TarjetaRepository tarjetaRepo;
+    @Autowired
+    private ArbitroRepository arbitroRepo;
 
     // canchas: crear, modificar, borrar, listar
 
-    public void crearCancha(String nombre, String direccion, String dueno, String telefono) {
-	CanchaFactory fact = new CanchaFactory();
-	this.canchaRepo
-		.save(fact.withNombre(nombre).withDireccion(direccion).withDueno(dueno).withTelefono(telefono).build());
+    public void crearCancha(Cancha cancha) {
+	this.canchaRepo.save(cancha);
+    }
+
+    public boolean existeCancha(String nombre) {
+	return this.canchaRepo.findByNombre(nombre) != null;
     }
 
     public void modificarCancha(Integer idCancha, Cancha cancha) {
@@ -127,14 +132,13 @@ public class TornadoService {
     }
 
     // Jugador: Crear, Borrar, listar
-    public void crearJugador(String nroDocumento, Integer categoria, String mail, Date fechaNacimiento, String nombre,
-	    String telefono) {
-	if (!this.existeJugador(nroDocumento)) {
-	    Jugador jugador = new JugadorFactory().withNroDocumento(nroDocumento).withCategoria(categoria)
-		    .withMail(mail).withFechaNacimiento(fechaNacimiento).withNombre(nombre).withTelefono(telefono)
-		    .build();
-	    this.jugadorRepo.save(jugador);
-	}
+    public void crearJugador(Jugador jugador) {
+	jugador.setEstado(EstadoJugador.HABILITADO);
+	this.jugadorRepo.save(jugador);
+    }
+
+    public boolean existeJugador(String nroDocumento) {
+	return this.jugadorRepo.findOne(nroDocumento) != null;
     }
 
     public void borrarJugador(String nroDocumento) {
@@ -184,13 +188,17 @@ public class TornadoService {
     public void publicarTorneo(Integer idTorneo) throws SQLException {
 	Torneo torneo = this.buscarTorneo(idTorneo);
 	if (torneo.publicable()) {
-	    List<Partido> partidos = torneo.publicar();
+	    List<Cancha> canchas = (List<Cancha>) canchaRepo.findAll();
+	    List<Arbitro> arbitros = (List<Arbitro>) arbitroRepo.findAll();
+	    List<Partido> partidos = torneo.publicar(canchas, arbitros);
+	    this.partidoRepo.save(partidos);
 	    torneo.iniciarTorneo();
 	}
     }
 
     public Iterable<Partido> listarPartidos(Integer idTorneo) {
-	return this.partidoRepo.findByTorneo(idTorneo);
+	Torneo torneo = this.torneoRepo.findOne(idTorneo);
+	return this.partidoRepo.findByTorneo(torneo);
     }
 
     public void cargarGoles(Integer cantidadGoles, Integer idPartido, String nroDocumento) throws SQLException {
@@ -323,8 +331,20 @@ public class TornadoService {
 	return new TablaGeneral(torneo.getNombre(), metricasEquipos);
     }
 
-    private boolean existeJugador(String nroDocumento) {
-	return this.jugadorRepo.findOne(nroDocumento) != null;
+    public void agregarArbitro(Arbitro arbitro) {
+	this.arbitroRepo.save(arbitro);
+    }
+
+    public boolean existeArbitro(String nombre) {
+	return this.arbitroRepo.findByNombre(nombre) != null;
+    }
+
+    public void borrarArbitro(Arbitro arbitro) {
+	this.arbitroRepo.delete(arbitro);
+    }
+
+    public Iterable<Arbitro> listarArbitros() {
+	return this.arbitroRepo.findAll();
     }
 
     private Cancha buscarCancha(String nombre) {
@@ -382,6 +402,13 @@ public class TornadoService {
 	    return partido;
 	}
 	throw new SQLException("El partido no existe");
+    }
+
+    public void jugarPartido(Integer idPartido) {
+	Partido partido = this.partidoRepo.findOne(idPartido);
+	if (partido != null) {
+	    this.partidoRepo.updatePartido(idPartido, partido.jugarPartido());
+	}
     }
 
 }

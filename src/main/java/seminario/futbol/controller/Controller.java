@@ -17,6 +17,7 @@ import seminario.futbol.estadisticas.EstadisticasEquipo;
 import seminario.futbol.estadisticas.EstadisticasJugador;
 import seminario.futbol.estadisticas.EstadisticasPartido;
 import seminario.futbol.estadisticas.TablaGeneral;
+import seminario.futbol.model.Arbitro;
 import seminario.futbol.model.Cancha;
 import seminario.futbol.model.Equipo;
 import seminario.futbol.model.Jugador;
@@ -33,9 +34,13 @@ public class Controller {
     private TornadoService tornadoService;
 
     @RequestMapping(value = "/canchas", method = RequestMethod.POST)
-    public void crearCancha(@RequestParam String nombre, @RequestParam String telefono, @RequestParam String dueno,
-	    @RequestParam String direccion) {
-	this.tornadoService.crearCancha(nombre, direccion, dueno, telefono);
+    public void crearCancha(@RequestBody Cancha cancha) {
+	this.tornadoService.crearCancha(cancha);
+    }
+
+    @RequestMapping(value = "/canchas/{nombre}", method = RequestMethod.GET)
+    public boolean existeCancha(@PathVariable("nombre") String nombre) {
+	return this.tornadoService.existeCancha(nombre);
     }
 
     @RequestMapping(value = "/canchas/{idCancha}", method = RequestMethod.PUT)
@@ -51,6 +56,26 @@ public class Controller {
     @RequestMapping(value = "/canchas", method = RequestMethod.GET)
     public Iterable<Cancha> listarCanchas() {
 	return this.tornadoService.listarCanchas();
+    }
+
+    @RequestMapping(value = "/arbitros", method = RequestMethod.PUT)
+    public void crearArbitro(@RequestBody Arbitro arbitro) {
+	this.tornadoService.agregarArbitro(arbitro);
+    }
+
+    @RequestMapping(value = "/arbitros/{nombre}", method = RequestMethod.GET)
+    public boolean existeArbitro(@PathVariable("nombre") String nombre) {
+	return this.tornadoService.existeArbitro(nombre);
+    }
+
+    @RequestMapping(value = "/arbitros", method = RequestMethod.GET)
+    public Iterable<Arbitro> listarArbitros() {
+	return this.tornadoService.listarArbitros();
+    }
+
+    @RequestMapping(value = "/arbitros", method = RequestMethod.DELETE)
+    public void borrarArbitro(@RequestBody Arbitro arbitro) {
+	this.tornadoService.borrarArbitro(arbitro);
     }
 
     @RequestMapping(value = "/equipos", method = RequestMethod.PUT)
@@ -96,13 +121,14 @@ public class Controller {
     }
 
     @RequestMapping(value = "/jugadores", method = RequestMethod.PUT)
-    public void crearJugador(@RequestParam("nroDocumento") String nroDocumento,
-	    @RequestParam("categoria") Integer categoria, @RequestParam("mail") String mail,
-	    @RequestParam("fechaNacimiento") String fechaNacimiento, @RequestParam("nombre") String nombre,
-	    @RequestParam("telefono") String telefono) throws ParseException {
+    public void crearJugador(@RequestBody Jugador jugador) throws ParseException {
 
-	this.tornadoService.crearJugador(nroDocumento, categoria, mail, this.parseDate(fechaNacimiento), nombre,
-		telefono);
+	this.tornadoService.crearJugador(jugador);
+    }
+
+    @RequestMapping(value = "/jugadores/{nroDocumento}", method = RequestMethod.GET)
+    public boolean existeJugador(@PathVariable("nroDocumento") String nroDocumento) {
+	return this.tornadoService.existeJugador(nroDocumento);
     }
 
     @RequestMapping(value = "/jugadores", method = RequestMethod.DELETE)
@@ -148,7 +174,7 @@ public class Controller {
 	this.tornadoService.publicarTorneo(idTorneo);
     }
 
-    @RequestMapping(value = "/torneos/{idTorneo}/partidos/", method = RequestMethod.GET)
+    @RequestMapping(value = "/torneos/{idTorneo}/partidos", method = RequestMethod.GET)
     public Iterable<Partido> listarPartidos(@PathVariable("idTorneo") Integer idTorneo) {
 	return this.tornadoService.listarPartidos(idTorneo);
     }
@@ -169,6 +195,11 @@ public class Controller {
 	    this.tornadoService.cargarTarjetaRoja(tarjeta.getPartido().getIdPartido(),
 		    tarjeta.getJugador().getNroDocumento(), tarjeta.getTipo());
 	}
+    }
+
+    @RequestMapping(value = "/partidos/{idPartido}", method = RequestMethod.POST)
+    public void jugarPartido(@PathVariable("idPartido") Integer idPartido) {
+	this.tornadoService.jugarPartido(idPartido);
     }
 
     @RequestMapping(value = "/estadisticas/jugadores", method = RequestMethod.GET)

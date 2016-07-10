@@ -5,6 +5,7 @@ import static seminario.futbol.model.EstadoTorneo.NO_INICIADO;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -78,6 +79,14 @@ public class Torneo {
 	this.descripcion = descripcion;
     }
 
+    public EstadoTorneo getEstado() {
+	return estado;
+    }
+
+    public void setEstado(EstadoTorneo estado) {
+	this.estado = estado;
+    }
+
     public Integer getCategoria() {
 	return categoria;
     }
@@ -114,19 +123,23 @@ public class Torneo {
 	return EstadoTorneo.NO_INICIADO == this.estado && this.equipos.size() > 1 && this.esPar(this.equipos.size());
     }
 
-    public List<Partido> publicar() {
+    public List<Partido> publicar(List<Cancha> canchas, List<Arbitro> arbitros) {
 	List<Partido> partidos = new ArrayList<Partido>();
 	int cantEquipos = this.equipos.size();
 	Date fechaRonda = this.inicio;
+	int maxCancha = canchas.size();
+	int maxArbitro = arbitros.size();
+	Random random = new Random();
 
 	// cada iteracion externa es una ronda de partidos
 	for (int i = 0; i < cantEquipos - 1; i++) {
 	    for (int j = 0; j < cantEquipos / 2; j++) {
 
-		Partido partido = partidoRepo.save(new PartidoFactory().withTorneo(this).withNroFecha(i + 1)
-			.withFecha(fechaRonda).withCancha(new Cancha()).withArbitro(new Arbitro())
-			.withEquipoA(this.equipos.get(j)).withEquipoB(this.equipos.get(cantEquipos - 1 - j))
-			.withNroFecha(i * (cantEquipos) + j + 1).build());
+		Partido partido = new PartidoFactory().withTorneo(this).withNroFecha(i + 1).withFecha(fechaRonda)
+			.withCancha(canchas.get(random.nextInt(maxCancha)))
+			.withArbitro(arbitros.get(random.nextInt(maxArbitro))).withEquipoA(this.equipos.get(j))
+			.withEquipoB(this.equipos.get(cantEquipos - 1 - j)).withNroFecha(i * (cantEquipos) + j + 1)
+			.build();
 		partidos.add(partido);
 
 	    }

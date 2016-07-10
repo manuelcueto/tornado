@@ -28,19 +28,6 @@ public class Jugador {
     @JoinColumn(name = "idEquipo")
     private Equipo equipo;
 
-    // public Jugador(String nroDocumento, Integer categoria, String mail, Date
-    // fechaNacimiento, String nombre,
-    // String telefono) {
-    // super();
-    // this.nroDocumento = nroDocumento;
-    // this.categoria = categoria;
-    // this.mail = mail;
-    // this.estado = EstadoJugador.HABILITADO;
-    // this.fechaNacimiento = fechaNacimiento;
-    // this.nombre = nombre;
-    // this.telefono = telefono;
-    // }
-
     public String getNroDocumento() {
 	return nroDocumento;
     }

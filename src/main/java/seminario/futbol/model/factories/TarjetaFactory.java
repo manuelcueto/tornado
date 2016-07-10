@@ -27,6 +27,6 @@ public class TarjetaFactory extends Tarjeta {
 	tarjeta.setJugador(this.getJugador());
 	tarjeta.setPartido(this.getPartido());
 	tarjeta.setTipo(this.getTipo());
-	return this;
+	return tarjeta;
     }
 }

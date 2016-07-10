@@ -2,6 +2,7 @@ package seminario.futbol.model.factories;
 
 import java.util.Date;
 
+import seminario.futbol.model.EstadoTorneo;
 import seminario.futbol.model.Torneo;
 
 public class TorneoFactory extends Torneo {
@@ -32,6 +33,7 @@ public class TorneoFactory extends Torneo {
 	torneo.setCategoria(this.getCategoria());
 	torneo.setInicio(this.getInicio());
 	torneo.setDescripcion("");
+	torneo.setEstado(EstadoTorneo.NO_INICIADO);
 	if (this.getDescripcion() != null) {
 	    torneo.setDescripcion(this.getDescripcion());
 	}
