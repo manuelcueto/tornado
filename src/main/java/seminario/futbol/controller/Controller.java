@@ -217,9 +217,10 @@ public class Controller {
 	return new Response<EstadisticasEquipo>(this.tornadoService.estadisticasEquipo(equipo.getIdEquipo()));
     }
 
-    @RequestMapping(value = "/estadisticas/partidos", method = RequestMethod.POST)
-    public Response<EstadisticasPartido> obtenerEstadisticasPartido(@RequestBody Partido partido) throws SQLException {
-	return new Response<EstadisticasPartido>(this.tornadoService.estadisticasPartido(partido.getIdPartido()));
+    @RequestMapping(value = "/estadisticas/partidos/{idPartido}", method = RequestMethod.POST)
+    public Response<EstadisticasPartido> obtenerEstadisticasPartido(@PathVariable("idPartido") Integer idPartido)
+	    throws SQLException {
+	return new Response<EstadisticasPartido>(this.tornadoService.estadisticasPartido(idPartido));
     }
 
     @RequestMapping(value = "/estadisticas/torneos", method = RequestMethod.POST)
@@ -228,6 +229,6 @@ public class Controller {
     }
 
     private Date parseDate(String dateAsString) throws ParseException {
-	return DateUtils.parseDate(dateAsString, "dd-MM-yyyy");
+	return DateUtils.parseDate(dateAsString, "dd-MM-yyyy", "yyyy-MM-dd");
     }
 }

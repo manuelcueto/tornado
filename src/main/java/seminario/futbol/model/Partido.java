@@ -81,6 +81,10 @@ public class Partido {
 	return idPartido;
     }
 
+    public void setIdPartido(Integer idPartido) {
+	this.idPartido = idPartido;
+    }
+
     public Equipo getEquipoA() {
 	return equipoA;
     }
