@@ -1,7 +1,5 @@
 package seminario.futbol.model;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -21,7 +19,6 @@ public class Jugador {
     private String mail;
     @Enumerated(EnumType.STRING)
     private EstadoJugador estado;
-    private Date fechaNacimiento;
     private String nombre;
     private String telefono;
     @ManyToOne
@@ -48,10 +45,6 @@ public class Jugador {
 	this.estado = estado;
     }
 
-    public void setFechaNacimiento(Date fechaNacimiento) {
-	this.fechaNacimiento = fechaNacimiento;
-    }
-
     public void setNombre(String nombre) {
 	this.nombre = nombre;
     }
@@ -70,10 +63,6 @@ public class Jugador {
 
     public EstadoJugador getEstado() {
 	return estado;
-    }
-
-    public Date getFechaNacimiento() {
-	return fechaNacimiento;
     }
 
     public String getNombre() {
@@ -99,6 +88,31 @@ public class Jugador {
     public void desasociarEquipo() {
 	this.equipo = null;
 
+    }
+
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((nroDocumento == null) ? 0 : nroDocumento.hashCode());
+	return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	Jugador other = (Jugador) obj;
+	if (nroDocumento == null) {
+	    if (other.nroDocumento != null)
+		return false;
+	} else if (!nroDocumento.equals(other.nroDocumento))
+	    return false;
+	return true;
     }
 
 }

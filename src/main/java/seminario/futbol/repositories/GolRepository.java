@@ -5,14 +5,11 @@ import org.springframework.data.repository.CrudRepository;
 import seminario.futbol.model.Gol;
 import seminario.futbol.model.Jugador;
 import seminario.futbol.model.Partido;
-import seminario.futbol.model.Torneo;
 
 public interface GolRepository extends CrudRepository<Gol, Integer> {
 
-	Integer countByJugador(Jugador jugador);
+    Integer countByJugador(Jugador jugador);
 
-	Integer countByJugadorAndPartido(Jugador jugador, Partido partido);
-
-	Integer countByJugadorAndTorneo(Jugador jugador, Torneo partido);
+    Integer countByJugadorAndPartido(Jugador jugador, Partido partido);
 
 }

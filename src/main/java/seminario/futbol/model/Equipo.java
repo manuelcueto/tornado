@@ -26,6 +26,8 @@ public class Equipo {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "equipo")
     private List<Jugador> jugadores;
 
+    private boolean asignado;
+
     public Integer getIdEquipo() {
 	return idEquipo;
     }
@@ -82,5 +84,13 @@ public class Equipo {
 
     public String getNombre() {
 	return this.nombre;
+    }
+
+    public boolean isAsignado() {
+	return this.asignado;
+    }
+
+    public void setAsignado(boolean asignado) {
+	this.asignado = asignado;
     }
 }

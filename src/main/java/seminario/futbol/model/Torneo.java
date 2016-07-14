@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Random;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,6 +19,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import seminario.futbol.repositories.PartidoRepository;
 @Table(name = "torneos")
 public class Torneo {
 
-    private static final int MAX_EQUIPOS = 10;
+    private static final int MAX_EQUIPOS = 18;
 
     @Autowired
     @Transient
@@ -37,6 +40,7 @@ public class Torneo {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idTorneo;
     private String nombre;
+    @Enumerated(EnumType.STRING)
     private EstadoTorneo estado;
     private String descripcion;
     private Integer categoria;
@@ -45,19 +49,22 @@ public class Torneo {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "canchasTorneo", joinColumns = {
 	    @JoinColumn(name = "idTorneo", nullable = false, updatable = false) }, inverseJoinColumns = {
-		    @JoinColumn(name = "idCancha", nullable = false, updatable = false) })
+		    @JoinColumn(name = "idCancha", nullable = false, updatable = false) }, uniqueConstraints = {
+			    @UniqueConstraint(columnNames = { "idTorneo", "idCancha" }) })
     private List<Cancha> canchas;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "arbitrosTorneo", joinColumns = {
 	    @JoinColumn(name = "idTorneo", nullable = false, updatable = false) }, inverseJoinColumns = {
-		    @JoinColumn(name = "idArbitro", nullable = false, updatable = false) })
+		    @JoinColumn(name = "idArbitro", nullable = false, updatable = false) }, uniqueConstraints = {
+			    @UniqueConstraint(columnNames = { "idTorneo", "idArbitro" }) })
     private List<Arbitro> arbitro;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "equiposTorneo", joinColumns = {
-	    @JoinColumn(name = "idTorneo", nullable = false, updatable = false) }, inverseJoinColumns = {
-		    @JoinColumn(name = "idEquipo", nullable = false, updatable = false) })
+	    @JoinColumn(name = "idTorneo", nullable = false) }, inverseJoinColumns = {
+		    @JoinColumn(name = "idEquipo", nullable = false, updatable = false) }, uniqueConstraints = {
+			    @UniqueConstraint(columnNames = { "idTorneo", "idEquipo" }) })
     private List<Equipo> equipos;
 
     @Transient
@@ -108,7 +115,8 @@ public class Torneo {
     }
 
     public boolean equipoAgregable(Equipo equipo) {
-	return this.estado == NO_INICIADO && this.equipos.size() < MAX_EQUIPOS && !this.equipos.contains(equipo);
+	return this.estado == NO_INICIADO && this.equipos.size() < MAX_EQUIPOS && !this.equipos.contains(equipo)
+		&& equipo.getCategoria().equals(this.categoria);
     }
 
     public void agregarEquipoATorneo(Equipo equipo) {
@@ -120,12 +128,14 @@ public class Torneo {
     }
 
     public boolean publicable() {
-	return EstadoTorneo.NO_INICIADO == this.estado && this.equipos.size() > 1 && this.esPar(this.equipos.size());
+	return EstadoTorneo.NO_INICIADO == this.estado && this.equipos.size() == this.MAX_EQUIPOS;
     }
 
     public List<Partido> publicar(List<Cancha> canchas, List<Arbitro> arbitros) {
 	List<Partido> partidos = new ArrayList<Partido>();
-	int cantEquipos = this.equipos.size();
+	List<Equipo> losEquipos = new ArrayList<Equipo>();
+	this.equipos.forEach(equipo -> losEquipos.add(equipo));
+	int cantEquipos = losEquipos.size();
 	Date fechaRonda = this.inicio;
 	int maxCancha = canchas.size();
 	int maxArbitro = arbitros.size();
@@ -137,13 +147,12 @@ public class Torneo {
 
 		Partido partido = new PartidoFactory().withTorneo(this).withNroFecha(i + 1).withFecha(fechaRonda)
 			.withCancha(canchas.get(random.nextInt(maxCancha)))
-			.withArbitro(arbitros.get(random.nextInt(maxArbitro))).withEquipoA(this.equipos.get(j))
-			.withEquipoB(this.equipos.get(cantEquipos - 1 - j)).withNroFecha(i * (cantEquipos) + j + 1)
-			.build();
+			.withArbitro(arbitros.get(random.nextInt(maxArbitro))).withEquipoA(losEquipos.get(j))
+			.withEquipoB(losEquipos.get(cantEquipos - 1 - j)).withNroFecha(i + 1).build();
 		partidos.add(partido);
 
 	    }
-	    this.reordenar(i);
+	    this.reordenar(losEquipos);
 	    fechaRonda = DateUtils.addDays(fechaRonda, 7);
 	}
 	return partidos;
@@ -153,12 +162,9 @@ public class Torneo {
 	this.estado = EstadoTorneo.INICIADO;
     }
 
-    private boolean esPar(int numero) {
-	return numero % 2 == 0;
-    }
-
-    private void reordenar(int ronda) {
-	this.equipos.add(ronda + 1, this.equipos.get(this.equipos.size() - 1));
+    private void reordenar(List<Equipo> equipos) {
+	equipos.add(1, equipos.get(equipos.size() - 1));
+	equipos.remove(equipos.size() - 1);
     }
 
     public List<Equipo> getEquipos() {
